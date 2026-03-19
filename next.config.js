@@ -12,17 +12,8 @@ const R2_ENDPOINT = process.env.R2_ENDPOINT || ''
 const nextConfig = {
   images: {
     remotePatterns: [
-      ...[NEXT_PUBLIC_SERVER_URL].map((item) => {
-        const url = new URL(item)
-        return {
-          hostname: url.hostname,
-          protocol: url.protocol.replace(':', ''),
-        }
-      }),
-      // Cloudflare R2 bucket for uploaded media
-      ...(R2_ENDPOINT
-        ? [{ hostname: new URL(R2_ENDPOINT).hostname, protocol: 'https' }]
-        : []),
+      { protocol: 'https', hostname: '**' },
+      { protocol: 'http', hostname: '**' },
     ],
   },
   async headers() {
