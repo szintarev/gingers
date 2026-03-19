@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { useRouter, usePathname } from 'next/navigation'
 import { useLanguage, type Language } from '@/contexts/LanguageContext'
 import {
   DropdownMenu,
@@ -23,9 +24,30 @@ const LANGUAGES: LanguageOption[] = [
   { code: 'ru', label: 'Русский', flagUrl: 'https://flagcdn.com/w40/ru.png' },
 ]
 
+const VALID_LOCALES = LANGUAGES.map((l) => l.code)
+
 export function LanguageSwitcher() {
   const { language, setLanguage } = useLanguage()
+  const router = useRouter()
+  const pathname = usePathname()
   const currentLanguage = LANGUAGES.find((l) => l.code === language) ?? LANGUAGES[0]!
+
+  // On mount, sync context from URL so a direct link with ?locale=sr works
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const urlLocale = params.get('locale') as Language | null
+    if (urlLocale && VALID_LOCALES.includes(urlLocale) && urlLocale !== language) {
+      setLanguage(urlLocale)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleSelect(lang: Language) {
+    setLanguage(lang)
+    // Update the URL so the server component re-fetches page content in the new locale
+    const params = new URLSearchParams(window.location.search)
+    params.set('locale', lang)
+    router.push(`${pathname}?${params.toString()}`)
+  }
 
   return (
     <DropdownMenu modal={false}>
@@ -51,7 +73,7 @@ export function LanguageSwitcher() {
         {LANGUAGES.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => setLanguage(lang.code)}
+            onClick={() => handleSelect(lang.code)}
             className={`flex items-center gap-2 cursor-pointer ${
               language === lang.code
                 ? 'bg-[#8B1538]/10 text-[#8B1538]'

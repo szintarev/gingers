@@ -38,15 +38,27 @@ export async function generateStaticParams() {
   return params
 }
 
+const VALID_LOCALES = ['en', 'sr', 'hu', 'ru'] as const
+type Locale = (typeof VALID_LOCALES)[number]
+
+function resolveLocale(raw: string | undefined): Locale {
+  return VALID_LOCALES.includes(raw as Locale) ? (raw as Locale) : 'en'
+}
+
 type Args = {
   params: Promise<{
     slug?: string
   }>
+  searchParams: Promise<{
+    locale?: string
+  }>
 }
 
-export default async function Page({ params: paramsPromise }: Args) {
+export default async function Page({ params: paramsPromise, searchParams: searchParamsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
   const { slug = 'home' } = await paramsPromise
+  const { locale: localeParam } = await searchParamsPromise
+  const locale = resolveLocale(localeParam)
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = '/' + decodedSlug
@@ -54,6 +66,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   page = await queryPageBySlug({
     slug: decodedSlug,
+    locale,
   })
 
   // Remove this code once your website is seeded
@@ -81,23 +94,27 @@ export default async function Page({ params: paramsPromise }: Args) {
   )
 }
 
-export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
+export async function generateMetadata({ params: paramsPromise, searchParams: searchParamsPromise }: Args): Promise<Metadata> {
   const { slug = 'home' } = await paramsPromise
+  const { locale: localeParam } = await searchParamsPromise
+  const locale = resolveLocale(localeParam)
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const page = await queryPageBySlug({
     slug: decodedSlug,
+    locale,
   })
 
   return generateMeta({ doc: page })
 }
 
-async function fetchPageBySlug(slug: string, draft: boolean) {
+async function fetchPageBySlug(slug: string, draft: boolean, locale: Locale) {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
     collection: 'pages',
     draft,
+    locale,
     limit: 1,
     pagination: false,
     overrideAccess: draft,
@@ -107,20 +124,20 @@ async function fetchPageBySlug(slug: string, draft: boolean) {
   return result.docs?.[0] ?? null
 }
 
-// Persistent cache with tag-based revalidation — only used outside draft mode
-const getCachedPageBySlug = (slug: string) =>
+// Persistent cache with tag-based revalidation — locale is part of the key
+const getCachedPageBySlug = (slug: string, locale: Locale) =>
   unstable_cache(
-    () => fetchPageBySlug(slug, false),
-    [`page_${slug}`],
+    () => fetchPageBySlug(slug, false, locale),
+    [`page_${slug}_${locale}`],
     { tags: [`pages_${slug}`, 'pages'], revalidate: 3600 },
   )
 
 // Request-level deduplication so generateMetadata and Page don't double-fetch
-const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
+const queryPageBySlug = cache(async ({ slug, locale }: { slug: string; locale: Locale }) => {
   const { isEnabled: draft } = await draftMode()
 
   // Draft mode bypasses the persistent cache so editors always see the latest content
-  if (draft) return fetchPageBySlug(slug, true)
+  if (draft) return fetchPageBySlug(slug, true, locale)
 
-  return getCachedPageBySlug(slug)()
+  return getCachedPageBySlug(slug, locale)()
 })
