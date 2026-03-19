@@ -2,18 +2,28 @@ import React, { Fragment } from 'react'
 
 import type { Page } from '@/payload-types'
 
-import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
-import { ContentBlock } from '@/blocks/Content/Component'
-import { FormBlock } from '@/blocks/Form/Component'
-import { MediaBlock } from '@/blocks/MediaBlock/Component'
+import { ProcessBlock } from '@/blocks/Process/Component'
+import { FarmStepsBlock } from '@/blocks/FarmSteps/Component'
+import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
+import { StatsBlock } from '@/blocks/Stats/Component'
+import { AboutBlock } from '@/blocks/About/Component'
+import { FeaturesBlock } from '@/blocks/Features/Component'
+import { ImageCarouselBlock } from '@/blocks/ImageCarousel/Component'
+import { HeroBlock } from '@/blocks/Hero/Component'
+import { PartnershipBlock } from '@/blocks/Partnership/Component'
 
 const blockComponents = {
-  archive: ArchiveBlock,
-  content: ContentBlock,
   cta: CallToActionBlock,
-  formBlock: FormBlock,
-  mediaBlock: MediaBlock,
+  process: ProcessBlock,
+  farmSteps: FarmStepsBlock,
+  testimonials: TestimonialsBlock,
+  stats: StatsBlock,
+  about: AboutBlock,
+  features: FeaturesBlock,
+  imageCarousel: ImageCarouselBlock,
+  hero: HeroBlock,
+  partnership: PartnershipBlock,
 }
 
 export const RenderBlocks: React.FC<{
@@ -30,13 +40,12 @@ export const RenderBlocks: React.FC<{
           const { blockType } = block
 
           if (blockType && blockType in blockComponents) {
-            const Block = blockComponents[blockType]
+            const Block = blockComponents[blockType as keyof typeof blockComponents]
 
             if (Block) {
               return (
-                <div className="my-16" key={index}>
-                  {/* @ts-expect-error there may be some mismatch between the expected types here */}
-                  <Block {...block} disableInnerContainer />
+                <div className="py-16" key={index}>
+                  <Block {...(block as any)} disableInnerContainer />
                 </div>
               )
             }

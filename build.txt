@@ -1,0 +1,57 @@
+﻿
+> with-vercel-website@1.0.0 build C:\Users\Zubek\Documents\GitHub\gingers-template
+> cross-env NODE_OPTIONS=--no-deprecation next build
+
+   Γû▓ Next.js 15.4.11
+
+   Creating an optimized production build ...
+pnpm : Failed to compile.
+At line:1 char:1
++ pnpm build > build.log 2>&1 ; type 
+build.log
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpec  
+  ified: (Failed to compile.:String    
+) [], RemoteException
+    + FullyQualifiedErrorId : NativeC  
+  ommandError
+ 
+
+./src/blocks/Hero/Component.tsx
+Module not found: Can't resolve 
+'motion/react'
+
+https://nextjs.org/docs/messages/module
+-not-found
+
+./src/blocks/ImageCarousel/Component.ts
+x
+Module not found: Can't resolve 
+'motion/react'
+
+https://nextjs.org/docs/messages/module
+-not-found
+
+./src/heros/HighImpact/index.tsx
+Module not found: Can't resolve 
+'motion/react'
+
+https://nextjs.org/docs/messages/module
+-not-found
+
+./src/collections/Products/index.ts
+Module not found: Can't resolve 
+'@/fields/slug'
+
+https://nextjs.org/docs/messages/module
+-not-found
+
+Import trace for requested module:
+./src/payload.config.ts
+./src/app/(frontend)/(sitemaps)/pages-s
+itemap.xml/route.ts
+
+
+> Build failed because of webpack 
+errors
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.

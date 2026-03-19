@@ -2,16 +2,22 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
-import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
-import { Content } from '../../blocks/Content/config'
-import { FormBlock } from '../../blocks/Form/config'
-import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { Process } from '../../blocks/Process/config'
+import { FarmSteps } from '../../blocks/FarmSteps/config'
+import { Testimonials } from '../../blocks/Testimonials/config'
+import { Stats } from '../../blocks/Stats/config'
+import { About } from '../../blocks/About/config'
+import { Features } from '../../blocks/Features/config'
+import { ImageCarousel } from '../../blocks/ImageCarousel/config'
+import { Hero } from '../../blocks/Hero/config'
+import { Partnership } from '../../blocks/Partnership/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
+import { autoTranslateHook } from '../../hooks/autoTranslate'
 
 import {
   MetaDescriptionField,
@@ -29,9 +35,6 @@ export const Pages: CollectionConfig<'pages'> = {
     read: authenticatedOrPublished,
     update: authenticated,
   },
-  // This config controls what's populated by default when a page is referenced
-  // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
-  // Type safe if the collection slug generic is passed to `CollectionConfig` - `CollectionConfig<'pages'>
   defaultPopulate: {
     title: true,
     slug: true,
@@ -72,7 +75,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [CallToAction, Process, FarmSteps, Testimonials, Stats, About, Features, ImageCarousel, Hero, Partnership],
               required: true,
               admin: {
                 initCollapsed: true,
@@ -96,13 +99,9 @@ export const Pages: CollectionConfig<'pages'> = {
             MetaImageField({
               relationTo: 'media',
             }),
-
             MetaDescriptionField({}),
             PreviewField({
-              // if the `generateUrl` function is configured
               hasGenerateFn: true,
-
-              // field paths to match the target field for data
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
             }),
@@ -117,17 +116,17 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
-    slugField(),
+    slugField({ fieldToUse: 'title' }),
   ],
   hooks: {
-    afterChange: [revalidatePage],
+    afterChange: [revalidatePage, autoTranslateHook],
     beforeChange: [populatePublishedAt],
     afterDelete: [revalidateDelete],
   },
   versions: {
     drafts: {
       autosave: {
-        interval: 100, // We set this interval for optimal live preview
+        interval: 100,
       },
       schedulePublish: true,
     },

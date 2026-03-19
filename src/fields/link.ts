@@ -75,7 +75,7 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
         condition: (_, siblingData) => siblingData?.type === 'reference',
       },
       label: 'Document to link to',
-      relationTo: ['pages', 'posts'],
+      relationTo: ['pages'],
       required: true,
     },
     {
@@ -90,18 +90,18 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
   ]
 
   if (!disableLabel) {
-    linkTypes.map((linkType) => ({
+    const narrowedLinkTypes = linkTypes.map((linkType) => ({
       ...linkType,
       admin: {
         ...linkType.admin,
         width: '50%',
       },
-    }))
+    })) as Field[]
 
     linkResult.fields.push({
       type: 'row',
       fields: [
-        ...linkTypes,
+        ...narrowedLinkTypes,
         {
           name: 'label',
           type: 'text',

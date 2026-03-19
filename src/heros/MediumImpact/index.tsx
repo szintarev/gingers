@@ -9,8 +9,8 @@ import RichText from '@/components/RichText'
 export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richText }) => {
   return (
     <div className="">
-      <div className="container mb-8">
-        {richText && <RichText className="mb-6" data={richText} enableGutter={false} />}
+      <div className="container pb-8">
+        {richText && <RichText className="pb-6" data={richText} enableGutter={false} />}
 
         {Array.isArray(links) && links.length > 0 && (
           <ul className="flex gap-4">
@@ -34,7 +34,7 @@ export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richTex
               resource={media}
             />
             {media?.caption && (
-              <div className="mt-3">
+              <div className="pt-3">
                 <RichText data={media.caption} enableGutter={false} />
               </div>
             )}

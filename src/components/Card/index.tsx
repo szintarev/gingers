@@ -4,11 +4,15 @@ import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
-import type { Post } from '@/payload-types'
-
+import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
 
-export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
+export type CardPostData = {
+  slug?: string | null
+  categories?: ({ id?: string | null; title?: string | null } | string)[] | null
+  meta?: { description?: string | null; image?: MediaType | string | number | null } | null
+  title?: string | null
+}
 
 export const Card: React.FC<{
   alignItems?: 'center'
@@ -26,7 +30,7 @@ export const Card: React.FC<{
 
   const hasCategories = categories && Array.isArray(categories) && categories.length > 0
   const titleToUse = titleFromProps || title
-  const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
+  const sanitizedDescription = description?.replace(/\s/g, ' ')
   const href = `/${relationTo}/${slug}`
 
   return (
@@ -37,35 +41,28 @@ export const Card: React.FC<{
       )}
       ref={card.ref}
     >
-      <div className="relative w-full ">
-        {!metaImage && <div className="">No image</div>}
+      <div className="relative w-full">
+        {!metaImage && <div>No image</div>}
         {metaImage && typeof metaImage !== 'string' && <Media resource={metaImage} size="33vw" />}
       </div>
       <div className="p-4">
         {showCategories && hasCategories && (
-          <div className="uppercase text-sm mb-4">
-            {showCategories && hasCategories && (
-              <div>
-                {categories?.map((category, index) => {
-                  if (typeof category === 'object') {
-                    const { title: titleFromCategory } = category
+          <div className="uppercase text-sm pb-4">
+            {categories?.map((category, index) => {
+              if (typeof category === 'object') {
+                const categoryTitle = category.title || 'Untitled category'
+                const isLast = index === categories.length - 1
 
-                    const categoryTitle = titleFromCategory || 'Untitled category'
+                return (
+                  <Fragment key={index}>
+                    {categoryTitle}
+                    {!isLast && <Fragment>, &nbsp;</Fragment>}
+                  </Fragment>
+                )
+              }
 
-                    const isLast = index === categories.length - 1
-
-                    return (
-                      <Fragment key={index}>
-                        {categoryTitle}
-                        {!isLast && <Fragment>, &nbsp;</Fragment>}
-                      </Fragment>
-                    )
-                  }
-
-                  return null
-                })}
-              </div>
-            )}
+              return null
+            })}
           </div>
         )}
         {titleToUse && (
@@ -77,7 +74,11 @@ export const Card: React.FC<{
             </h3>
           </div>
         )}
-        {description && <div className="mt-2">{description && <p>{sanitizedDescription}</p>}</div>}
+        {description && (
+          <div className="pt-2">
+            <p>{sanitizedDescription}</p>
+          </div>
+        )}
       </div>
     </article>
   )

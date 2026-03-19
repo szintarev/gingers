@@ -6,19 +6,35 @@ const NEXT_PUBLIC_SERVER_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   : undefined || process.env.__NEXT_PRIVATE_ORIGIN || 'http://localhost:3000'
 
+const R2_ENDPOINT = process.env.R2_ENDPOINT || ''
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     remotePatterns: [
-      ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
+      ...[NEXT_PUBLIC_SERVER_URL].map((item) => {
         const url = new URL(item)
-
         return {
           hostname: url.hostname,
           protocol: url.protocol.replace(':', ''),
         }
       }),
+      // Cloudflare R2 bucket for uploaded media
+      ...(R2_ENDPOINT
+        ? [{ hostname: new URL(R2_ENDPOINT).hostname, protocol: 'https' }]
+        : []),
     ],
+  },
+  async headers() {
+    return [
+      {
+        // Cache uploaded media served from the app for 7 days, served stale while refreshing
+        source: '/media/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=86400' },
+        ],
+      },
+    ]
   },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {

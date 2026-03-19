@@ -48,6 +48,18 @@ export const AdminBar: React.FC<{
 
   return (
     <div
+      ref={(el) => {
+        if (!el) return
+        const update = () => {
+          const h = el.classList.contains('hidden') ? 0 : el.offsetHeight
+          document.documentElement.style.setProperty('--admin-bar-height', `${h}px`)
+        }
+        update()
+        const resizeObserver = new ResizeObserver(update)
+        resizeObserver.observe(el)
+        const mutationObserver = new MutationObserver(update)
+        mutationObserver.observe(el, { attributes: true, attributeFilter: ['class'] })
+      }}
       className={cn(baseClass, 'py-2 bg-black text-white', {
         block: show,
         hidden: !show,
