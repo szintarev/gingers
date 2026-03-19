@@ -5,38 +5,33 @@ export const FarmSteps: Block = {
   interfaceName: 'FarmStepsBlock',
   fields: [
     {
-      name: 'processLabel',
+      name: 'label',
       type: 'text',
       localized: true,
       required: true,
-      defaultValue: 'OUR PROCESS',
+      defaultValue: 'WHY CHOOSE US',
     },
     {
       name: 'title',
       type: 'text',
       localized: true,
       required: true,
-      defaultValue: 'From Farm to Door',
+      defaultValue: 'What Makes Us Special',
     },
     {
       name: 'description',
       type: 'textarea',
       localized: true,
-      required: true,
-      defaultValue: 'Our process is simple, sustainable, and transparent.',
-    },
-    {
-      name: 'backgroundImage',
-      type: 'upload',
-      relationTo: 'media',
       required: false,
+      defaultValue:
+        "We're committed to providing the highest quality ginger products with exceptional service and care",
     },
     {
-      name: 'steps',
+      name: 'features',
       type: 'array',
       required: true,
       minRows: 1,
-      maxRows: 4,
+      maxRows: 6,
       fields: [
         {
           name: 'title',
@@ -51,16 +46,17 @@ export const FarmSteps: Block = {
           required: true,
         },
         {
-          name: 'stepNumber',
-          type: 'text',
-          required: true,
-          defaultValue: '01',
-        },
-        {
           name: 'icon',
           type: 'select',
           required: true,
+          defaultValue: 'Leaf',
           options: [
+            { label: 'Leaf (Organic)', value: 'Leaf' },
+            { label: 'Shield (Quality)', value: 'ShieldCheck' },
+            { label: 'Truck (Delivery)', value: 'Truck' },
+            { label: 'Award (Winning)', value: 'Award' },
+            { label: 'Heart (Health)', value: 'Heart' },
+            { label: 'Users (Support)', value: 'Users' },
             { label: 'Sprout', value: 'Sprout' },
             { label: 'Flask', value: 'FlaskConical' },
             { label: 'Package', value: 'Package' },

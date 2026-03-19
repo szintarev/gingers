@@ -12,6 +12,7 @@ import { Features } from '../../blocks/Features/config'
 import { ImageCarousel } from '../../blocks/ImageCarousel/config'
 import { Hero } from '../../blocks/Hero/config'
 import { Partnership } from '../../blocks/Partnership/config'
+import { ProductsBlock } from '../../blocks/Products/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -75,7 +76,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Process, FarmSteps, Testimonials, Stats, About, Features, ImageCarousel, Hero, Partnership],
+              blocks: [CallToAction, Process, FarmSteps, Testimonials, Stats, About, Features, ImageCarousel, Hero, Partnership, ProductsBlock],
               required: true,
               admin: {
                 initCollapsed: true,

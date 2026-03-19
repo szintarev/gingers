@@ -12,6 +12,7 @@ import { FeaturesBlock } from '@/blocks/Features/Component'
 import { ImageCarouselBlock } from '@/blocks/ImageCarousel/Component'
 import { HeroBlock } from '@/blocks/Hero/Component'
 import { PartnershipBlock } from '@/blocks/Partnership/Component'
+import { ProductsBlockComponent } from '@/blocks/Products/Component'
 
 const blockComponents = {
   cta: CallToActionBlock,
@@ -24,6 +25,7 @@ const blockComponents = {
   imageCarousel: ImageCarouselBlock,
   hero: HeroBlock,
   partnership: PartnershipBlock,
+  products: ProductsBlockComponent,
 }
 
 export const RenderBlocks: React.FC<{

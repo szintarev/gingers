@@ -211,6 +211,7 @@ export interface Page {
     | ImageCarouselBlock
     | HeroBlock
     | PartnershipBlock
+    | ProductsBlock
   )[];
   meta?: {
     title?: string | null;
@@ -417,15 +418,23 @@ export interface ProcessBlock {
  * via the `definition` "FarmStepsBlock".
  */
 export interface FarmStepsBlock {
-  processLabel: string;
+  label: string;
   title: string;
-  description: string;
-  backgroundImage?: (number | null) | Media;
-  steps: {
+  description?: string | null;
+  features: {
     title: string;
     description: string;
-    stepNumber: string;
-    icon: 'Sprout' | 'FlaskConical' | 'Package' | 'Star';
+    icon:
+      | 'Leaf'
+      | 'ShieldCheck'
+      | 'Truck'
+      | 'Award'
+      | 'Heart'
+      | 'Users'
+      | 'Sprout'
+      | 'FlaskConical'
+      | 'Package'
+      | 'Star';
     id?: string | null;
   }[];
   id?: string | null;
@@ -600,6 +609,18 @@ export interface PartnershipBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'partnership';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductsBlock".
+ */
+export interface ProductsBlock {
+  label: string;
+  title: string;
+  description?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'products';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -922,6 +943,7 @@ export interface PagesSelect<T extends boolean = true> {
         imageCarousel?: T | ImageCarouselBlockSelect<T>;
         hero?: T | HeroBlockSelect<T>;
         partnership?: T | PartnershipBlockSelect<T>;
+        products?: T | ProductsBlockSelect<T>;
       };
   meta?:
     | T
@@ -987,16 +1009,14 @@ export interface ProcessBlockSelect<T extends boolean = true> {
  * via the `definition` "FarmStepsBlock_select".
  */
 export interface FarmStepsBlockSelect<T extends boolean = true> {
-  processLabel?: T;
+  label?: T;
   title?: T;
   description?: T;
-  backgroundImage?: T;
-  steps?:
+  features?:
     | T
     | {
         title?: T;
         description?: T;
-        stepNumber?: T;
         icon?: T;
         id?: T;
       };
@@ -1167,6 +1187,17 @@ export interface HeroBlockSelect<T extends boolean = true> {
  */
 export interface PartnershipBlockSelect<T extends boolean = true> {
   heading?: T;
+  description?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductsBlock_select".
+ */
+export interface ProductsBlockSelect<T extends boolean = true> {
+  label?: T;
+  title?: T;
   description?: T;
   id?: T;
   blockName?: T;
