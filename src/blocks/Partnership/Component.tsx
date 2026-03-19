@@ -69,7 +69,7 @@ export const PartnershipBlock: React.FC<PartnershipBlockProps> = ({ heading, des
           <CheckCircle className="w-16 h-16 text-white mx-auto pb-6" />
           <h2 className="text-3xl text-white pb-4">Thank You!</h2>
           <p className="text-white/70 text-lg">
-            We've received your partnership inquiry and will get back to you within 1–2 business days.
+            We&apos;ve received your partnership inquiry and will get back to you within 1–2 business days.
           </p>
           <button
             onClick={() => { setShowSuccess(false); setSubmits(0) }}

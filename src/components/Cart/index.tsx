@@ -406,7 +406,7 @@ function OrderSuccess() {
       </div>
       <h3 className="text-xl font-semibold text-gray-900 pb-2">Order Received!</h3>
       <p className="text-gray-500 text-sm leading-relaxed">
-        Thank you for your order. We've sent a confirmation to your email and will be in touch shortly.
+        Thank you for your order. We&apos;ve sent a confirmation to your email and will be in touch shortly.
       </p>
     </div>
   )

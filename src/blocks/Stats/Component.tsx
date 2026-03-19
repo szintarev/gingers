@@ -27,7 +27,7 @@ export const StatsBlock: React.FC<StatsBlockProps> = ({
               {floatingQuote && (
                 <div className="absolute bottom-8 left-8 right-8 bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl transition-transform hover:scale-[1.02] duration-300">
                   <p className="text-gray-700 text-sm leading-relaxed italic">
-                    "{floatingQuote.quoteText}"
+                    &ldquo;{floatingQuote.quoteText}&rdquo;
                   </p>
                   <div className="flex items-center gap-3 pt-4">
                     <div className="w-10 h-10 rounded-full bg-[#8B1538] flex items-center justify-center text-white text-sm font-semibold">

@@ -43,7 +43,7 @@ export const TestimonialsBlock: React.FC<TestimonialsBlockProps> = ({
                   ))}
                 </div>
                 <p className="text-gray-600 leading-relaxed pb-6 italic">
-                  "{testimonial.text}"
+                  &ldquo;{testimonial.text}&rdquo;
                 </p>
                 <div className="pt-4 border-t border-gray-200 mt-auto">
                   <div className="text-gray-900 font-medium">{testimonial.name}</div>
