@@ -2,15 +2,14 @@
 
 import React, { useState, useTransition } from 'react'
 import {
-  ShoppingBag, Minus, Plus, Trash2, RefreshCw, ShieldCheck,
-  Truck, RotateCcw, Tag, ArrowRight, Lock, ChevronLeft, Loader2, Package,
+  ShoppingBag, Minus, Plus, Trash2, RefreshCw,
+  ArrowRight, ChevronLeft, Loader2, Package,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useCart, type ShippingInfo } from '@/contexts/CartContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { COUNTRIES } from '@/lib/countries'
 
-const FREE_SHIPPING_THRESHOLD = 50
 const CURRENCY = '€'
 
 const EMPTY_SHIPPING: ShippingInfo = {
@@ -30,13 +29,8 @@ export function CartBlockComponent() {
   const [shipping, setShipping] = useState<ShippingInfo>(EMPTY_SHIPPING)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
-  const [promoCode, setPromoCode] = useState('')
-  const [promoError, setPromoError] = useState('')
 
   const total = getTotalPrice()
-  const shippingProgress = Math.min((total / FREE_SHIPPING_THRESHOLD) * 100, 100)
-  const freeShippingUnlocked = total >= FREE_SHIPPING_THRESHOLD
-  const remaining = (FREE_SHIPPING_THRESHOLD - total).toFixed(2)
   const selectedCountry = COUNTRIES.find((c) => c.code === shipping.country)
   const states = selectedCountry?.states ?? []
   const isShippingValid = shipping.firstName && shipping.lastName && shipping.email && shipping.address && shipping.city && shipping.postalCode && shipping.country
@@ -69,22 +63,25 @@ export function CartBlockComponent() {
       {/* ── Hero ── */}
       <div style={{ backgroundColor: '#8B1538', position: 'relative', paddingTop: '4rem', paddingBottom: '4rem' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          {/* Back link */}
           {step === 'shipping' ? (
             <button onClick={() => setStep('cart')} className="flex items-center gap-1 text-white/70 hover:text-white transition-colors text-sm mb-6">
-              <ChevronLeft className="w-4 h-4" /> continueShopping
+              <ChevronLeft className="w-4 h-4" /> Continue Shopping
             </button>
           ) : (
             <Link href="/" className="flex items-center gap-1 text-white/70 hover:text-white transition-colors text-sm mb-6">
-              <ChevronLeft className="w-4 h-4" /> continueShopping
+              <ChevronLeft className="w-4 h-4" /> Continue Shopping
             </Link>
           )}
+
+          {/* Title */}
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md flex-shrink-0">
               <ShoppingBag className="w-7 h-7" style={{ color: '#8B1538' }} />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">
-                <span className="font-light">your</span>Cart
+                Your Cart
               </h1>
               <p className="text-white/60 text-sm mt-1">
                 {step === 'success' ? 'Order placed!' : `${getTotalItems()} ${getTotalItems() === 1 ? 'item' : 'items'}`}
@@ -92,6 +89,7 @@ export function CartBlockComponent() {
             </div>
           </div>
         </div>
+
         {/* Wave */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, overflow: 'hidden', lineHeight: 0 }}>
           <svg viewBox="0 0 1440 56" preserveAspectRatio="none" style={{ width: '100%', height: '3.5rem', display: 'block' }}>
@@ -142,23 +140,6 @@ export function CartBlockComponent() {
 
               {step === 'cart' && (
                 <>
-                  {/* Free shipping bar */}
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-                    <div className="flex justify-between items-center text-sm mb-2">
-                      <span className="flex items-center gap-1.5 font-medium text-gray-800">
-                        <Truck className="w-4 h-4" style={{ color: '#8B1538' }} />
-                        {freeShippingUnlocked
-                          ? <span style={{ color: '#8B1538' }} className="font-semibold">🎉 You&apos;ve unlocked free shipping!</span>
-                          : <span>Add <span style={{ color: '#8B1538' }} className="font-semibold">{CURRENCY}{remaining}</span> more for free shipping</span>
-                        }
-                      </span>
-                      <span className="text-gray-400 text-xs">{CURRENCY}{FREE_SHIPPING_THRESHOLD} threshold</span>
-                    </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${shippingProgress}%`, backgroundColor: '#8B1538' }} />
-                    </div>
-                  </div>
-
                   {/* Items */}
                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-50">
                     {cart.map((item) => (
@@ -174,12 +155,23 @@ export function CartBlockComponent() {
                           <p className="font-semibold text-gray-900">{item.name}</p>
                           {item.weight && <p className="text-gray-400 text-xs mt-0.5">{item.weight}</p>}
                           <div className="flex items-center gap-4 mt-3">
-                            <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-2 py-1">
-                              <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors">
+                            {/* Quantity stepper */}
+                            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                                style={{ color: '#374151' }}
+                              >
                                 <Minus className="w-3 h-3" />
                               </button>
-                              <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
-                              <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors">
+                              <span style={{ color: '#111827', minWidth: '2rem', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600 }}>
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                                style={{ color: '#374151' }}
+                              >
                                 <Plus className="w-3 h-3" />
                               </button>
                             </div>
@@ -200,21 +192,6 @@ export function CartBlockComponent() {
                     <button onClick={clearCart} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors">
                       <RefreshCw className="w-3.5 h-3.5" /> Clear all items
                     </button>
-                  </div>
-
-                  {/* Trust badges */}
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      { icon: <ShieldCheck className="w-5 h-5" style={{ color: '#8B1538' }} />, title: 'Secure checkout', sub: '256-bit SSL' },
-                      { icon: <Truck className="w-5 h-5" style={{ color: '#8B1538' }} />, title: 'Fast delivery', sub: '2–4 business days' },
-                      { icon: <RotateCcw className="w-5 h-5" style={{ color: '#8B1538' }} />, title: 'Easy returns', sub: '30-day policy' },
-                    ].map((b) => (
-                      <div key={b.title} className="flex flex-col items-center text-center bg-white rounded-2xl border border-gray-100 shadow-sm py-4 px-3">
-                        {b.icon}
-                        <p className="text-xs font-medium text-gray-700 mt-2">{b.title}</p>
-                        <p className="text-xs text-gray-400">{b.sub}</p>
-                      </div>
-                    ))}
                   </div>
                 </>
               )}
@@ -270,28 +247,15 @@ export function CartBlockComponent() {
                   ))}
                   <div className="border-t border-gray-100 pt-3 space-y-2">
                     <div className="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>{CURRENCY}{total.toFixed(2)}</span></div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Shipping</span>
-                      <span className={freeShippingUnlocked ? 'text-green-500 font-medium' : 'text-gray-600'}>{freeShippingUnlocked ? 'Free' : `${CURRENCY}5.00`}</span>
-                    </div>
+                    <div className="flex justify-between text-sm text-gray-600"><span>Shipping</span><span>Calculated at checkout</span></div>
                   </div>
                   <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
                     <span className="font-semibold text-gray-900">Total</span>
-                    <span className="text-xl font-bold" style={{ color: '#8B1538' }}>{CURRENCY}{(freeShippingUnlocked ? total : total + 5).toFixed(2)}</span>
+                    <span className="text-xl font-bold" style={{ color: '#8B1538' }}>{CURRENCY}{total.toFixed(2)}</span>
                   </div>
-                  {/* Promo */}
-                  <div className="pt-1">
-                    <div className="flex gap-2">
-                      <div className="flex-1 flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2">
-                        <Tag className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                        <input type="text" className="flex-1 text-sm outline-none placeholder:text-gray-400 bg-transparent" placeholder="Promo code" value={promoCode} onChange={(e) => { setPromoCode(e.target.value); setPromoError('') }} />
-                      </div>
-                      <button onClick={() => setPromoError('Invalid or expired promo code.')} style={{ backgroundColor: '#8B1538' }} className="text-white text-sm font-medium px-4 rounded-lg flex-shrink-0">Apply</button>
-                    </div>
-                    {promoError && <p className="text-red-400 text-xs mt-1">{promoError}</p>}
-                  </div>
+
                   {/* CTA */}
-                  <div className="pt-1">
+                  <div className="pt-2">
                     {step === 'cart' && (
                       <button onClick={() => setStep('shipping')} style={{ backgroundColor: '#8B1538' }} className="w-full text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
                         Proceed to Checkout <ArrowRight className="w-4 h-4" />
@@ -302,9 +266,6 @@ export function CartBlockComponent() {
                         {isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> Placing Order...</> : 'Place Order'}
                       </button>
                     )}
-                  </div>
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-gray-400 pb-1">
-                    <Lock className="w-3 h-3" /> Secure &amp; encrypted payment
                   </div>
                 </div>
               </div>
