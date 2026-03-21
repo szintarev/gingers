@@ -1,0 +1,318 @@
+'use client'
+
+import React, { useState, useTransition } from 'react'
+import {
+  ShoppingBag, Minus, Plus, Trash2, RefreshCw, ShieldCheck,
+  Truck, RotateCcw, Tag, ArrowRight, Lock, ChevronLeft, Loader2, Package,
+} from 'lucide-react'
+import Link from 'next/link'
+import { useCart, type ShippingInfo } from '@/contexts/CartContext'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { COUNTRIES } from '@/lib/countries'
+
+const FREE_SHIPPING_THRESHOLD = 50
+const CURRENCY = '€'
+
+const EMPTY_SHIPPING: ShippingInfo = {
+  firstName: '', lastName: '', email: '', phone: '',
+  address: '', city: '', postalCode: '', country: '', state: '', notes: '',
+}
+
+type Step = 'cart' | 'shipping' | 'success'
+
+const inputClass = 'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1538]/30 focus:border-[#8B1538] transition-colors placeholder:text-gray-400 bg-white'
+const labelClass = 'block text-xs font-medium text-gray-600 mb-1.5'
+
+export function CartBlockComponent() {
+  const { cart, removeFromCart, updateQuantity, getTotalPrice, getTotalItems, clearCart } = useCart()
+  const { t } = useLanguage()
+  const [step, setStep] = useState<Step>('cart')
+  const [shipping, setShipping] = useState<ShippingInfo>(EMPTY_SHIPPING)
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState('')
+  const [promoCode, setPromoCode] = useState('')
+  const [promoError, setPromoError] = useState('')
+
+  const total = getTotalPrice()
+  const shippingProgress = Math.min((total / FREE_SHIPPING_THRESHOLD) * 100, 100)
+  const freeShippingUnlocked = total >= FREE_SHIPPING_THRESHOLD
+  const remaining = (FREE_SHIPPING_THRESHOLD - total).toFixed(2)
+  const selectedCountry = COUNTRIES.find((c) => c.code === shipping.country)
+  const states = selectedCountry?.states ?? []
+  const isShippingValid = shipping.firstName && shipping.lastName && shipping.email && shipping.address && shipping.city && shipping.postalCode && shipping.country
+
+  function handleShippingChange(field: keyof ShippingInfo, value: string) {
+    setShipping((prev) => field === 'country' ? { ...prev, country: value, state: '' } : { ...prev, [field]: value })
+  }
+
+  function handlePlaceOrder() {
+    setError('')
+    startTransition(async () => {
+      try {
+        const res = await fetch('/api/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cart, shipping }),
+        })
+        if (!res.ok) throw new Error()
+        clearCart()
+        setStep('success')
+      } catch {
+        setError('Something went wrong. Please try again.')
+      }
+    })
+  }
+
+  return (
+    <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+
+      {/* ── Hero ── */}
+      <div style={{ backgroundColor: '#8B1538', position: 'relative', paddingTop: '4rem', paddingBottom: '4rem' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          {step === 'shipping' ? (
+            <button onClick={() => setStep('cart')} className="flex items-center gap-1 text-white/70 hover:text-white transition-colors text-sm mb-6">
+              <ChevronLeft className="w-4 h-4" /> continueShopping
+            </button>
+          ) : (
+            <Link href="/" className="flex items-center gap-1 text-white/70 hover:text-white transition-colors text-sm mb-6">
+              <ChevronLeft className="w-4 h-4" /> continueShopping
+            </Link>
+          )}
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md flex-shrink-0">
+              <ShoppingBag className="w-7 h-7" style={{ color: '#8B1538' }} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white">
+                <span className="font-light">your</span>Cart
+              </h1>
+              <p className="text-white/60 text-sm mt-1">
+                {step === 'success' ? 'Order placed!' : `${getTotalItems()} ${getTotalItems() === 1 ? 'item' : 'items'}`}
+              </p>
+            </div>
+          </div>
+        </div>
+        {/* Wave */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, overflow: 'hidden', lineHeight: 0 }}>
+          <svg viewBox="0 0 1440 56" preserveAspectRatio="none" style={{ width: '100%', height: '3.5rem', display: 'block' }}>
+            <path d="M0,32 C240,56 480,8 720,28 C960,48 1200,8 1440,24 L1440,56 L0,56 Z" fill="#f9fafb" />
+          </svg>
+        </div>
+      </div>
+
+      {/* ── Body ── */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-24 pt-8">
+
+        {/* Success */}
+        {step === 'success' && (
+          <div className="flex flex-col items-center justify-center text-center py-20">
+            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6">
+              <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Order Received!</h2>
+            <p className="text-gray-500 text-sm leading-relaxed max-w-sm mb-8">
+              Thank you for your order. We&apos;ve sent a confirmation to your email and will be in touch shortly.
+            </p>
+            <Link href="/" style={{ backgroundColor: '#8B1538' }} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-xl font-medium">
+              Continue Shopping
+            </Link>
+          </div>
+        )}
+
+        {/* Empty cart */}
+        {step === 'cart' && cart.length === 0 && (
+          <div className="flex flex-col items-center justify-center text-center py-20">
+            <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
+            <p className="text-gray-700 font-medium text-lg">{t('emptyCart')}</p>
+            <p className="text-gray-400 text-sm mt-1 mb-8">{t('emptyCartDesc')}</p>
+            <Link href="/" style={{ backgroundColor: '#8B1538' }} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-xl font-medium">
+              Browse Products
+            </Link>
+          </div>
+        )}
+
+        {/* Cart / Shipping */}
+        {step !== 'success' && cart.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            {/* Left */}
+            <div className="lg:col-span-2 space-y-4">
+
+              {step === 'cart' && (
+                <>
+                  {/* Free shipping bar */}
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+                    <div className="flex justify-between items-center text-sm mb-2">
+                      <span className="flex items-center gap-1.5 font-medium text-gray-800">
+                        <Truck className="w-4 h-4" style={{ color: '#8B1538' }} />
+                        {freeShippingUnlocked
+                          ? <span style={{ color: '#8B1538' }} className="font-semibold">🎉 You&apos;ve unlocked free shipping!</span>
+                          : <span>Add <span style={{ color: '#8B1538' }} className="font-semibold">{CURRENCY}{remaining}</span> more for free shipping</span>
+                        }
+                      </span>
+                      <span className="text-gray-400 text-xs">{CURRENCY}{FREE_SHIPPING_THRESHOLD} threshold</span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${shippingProgress}%`, backgroundColor: '#8B1538' }} />
+                    </div>
+                  </div>
+
+                  {/* Items */}
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-50">
+                    {cart.map((item) => (
+                      <div key={item.id} className="flex gap-4 p-5 items-start">
+                        {item.image
+                          ? <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded-xl bg-gray-100 flex-shrink-0" />
+                          : <div className="w-20 h-20 rounded-xl bg-gray-100 flex-shrink-0" />
+                        }
+                        <div className="flex-1 min-w-0">
+                          {item.category && (
+                            <span className="inline-block text-xs font-medium text-gray-600 bg-gray-100 rounded-full px-2 py-0.5 mb-1">{item.category}</span>
+                          )}
+                          <p className="font-semibold text-gray-900">{item.name}</p>
+                          {item.weight && <p className="text-gray-400 text-xs mt-0.5">{item.weight}</p>}
+                          <div className="flex items-center gap-4 mt-3">
+                            <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-2 py-1">
+                              <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors">
+                                <Minus className="w-3 h-3" />
+                              </button>
+                              <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
+                              <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors">
+                                <Plus className="w-3 h-3" />
+                              </button>
+                            </div>
+                            <button onClick={() => removeFromCart(item.id)} className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-400 transition-colors">
+                              <Trash2 className="w-3.5 h-3.5" /> Remove
+                            </button>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="font-semibold text-gray-900">{CURRENCY}{(item.price * item.quantity).toFixed(2)}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{CURRENCY}{item.price.toFixed(2)} each</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button onClick={clearCart} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors">
+                      <RefreshCw className="w-3.5 h-3.5" /> Clear all items
+                    </button>
+                  </div>
+
+                  {/* Trust badges */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { icon: <ShieldCheck className="w-5 h-5" style={{ color: '#8B1538' }} />, title: 'Secure checkout', sub: '256-bit SSL' },
+                      { icon: <Truck className="w-5 h-5" style={{ color: '#8B1538' }} />, title: 'Fast delivery', sub: '2–4 business days' },
+                      { icon: <RotateCcw className="w-5 h-5" style={{ color: '#8B1538' }} />, title: 'Easy returns', sub: '30-day policy' },
+                    ].map((b) => (
+                      <div key={b.title} className="flex flex-col items-center text-center bg-white rounded-2xl border border-gray-100 shadow-sm py-4 px-3">
+                        {b.icon}
+                        <p className="text-xs font-medium text-gray-700 mt-2">{b.title}</p>
+                        <p className="text-xs text-gray-400">{b.sub}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {step === 'shipping' && (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><label className={labelClass}>First Name *</label><input className={inputClass} value={shipping.firstName} onChange={(e) => handleShippingChange('firstName', e.target.value)} placeholder="John" /></div>
+                    <div><label className={labelClass}>Last Name *</label><input className={inputClass} value={shipping.lastName} onChange={(e) => handleShippingChange('lastName', e.target.value)} placeholder="Doe" /></div>
+                  </div>
+                  <div><label className={labelClass}>Email Address *</label><input type="email" className={inputClass} value={shipping.email} onChange={(e) => handleShippingChange('email', e.target.value)} placeholder="john@example.com" /></div>
+                  <div><label className={labelClass}>Phone Number</label><input type="tel" className={inputClass} value={shipping.phone} onChange={(e) => handleShippingChange('phone', e.target.value)} placeholder="+1 234 567 8900" /></div>
+                  <div><label className={labelClass}>Street Address *</label><input className={inputClass} value={shipping.address} onChange={(e) => handleShippingChange('address', e.target.value)} placeholder="123 Main Street" /></div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><label className={labelClass}>City *</label><input className={inputClass} value={shipping.city} onChange={(e) => handleShippingChange('city', e.target.value)} placeholder="New York" /></div>
+                    <div><label className={labelClass}>Postal Code *</label><input className={inputClass} value={shipping.postalCode} onChange={(e) => handleShippingChange('postalCode', e.target.value)} placeholder="10001" /></div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Country *</label>
+                    <select className={inputClass} value={shipping.country} onChange={(e) => handleShippingChange('country', e.target.value)}>
+                      <option value="">Select country...</option>
+                      {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+                    </select>
+                  </div>
+                  {shipping.country && (
+                    <div>
+                      <label className={labelClass}>State / Region</label>
+                      {states.length > 0
+                        ? <select className={inputClass} value={shipping.state} onChange={(e) => handleShippingChange('state', e.target.value)}><option value="">Select state...</option>{states.map((s) => <option key={s.code} value={s.name}>{s.name}</option>)}</select>
+                        : <input className={inputClass} value={shipping.state} onChange={(e) => handleShippingChange('state', e.target.value)} placeholder="Region / Province" />
+                      }
+                    </div>
+                  )}
+                  <div><label className={labelClass}>Order Notes</label><textarea className={`${inputClass} resize-none`} rows={3} value={shipping.notes} onChange={(e) => handleShippingChange('notes', e.target.value)} placeholder="Special delivery instructions, allergies, etc." /></div>
+                  {error && <p className="text-red-500 text-sm">{error}</p>}
+                </div>
+              )}
+            </div>
+
+            {/* Right — Order summary */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-24">
+                <div style={{ backgroundColor: '#8B1538' }} className="px-5 py-4 flex items-center gap-2">
+                  <Package className="w-5 h-5 text-white/80" />
+                  <h2 className="font-semibold text-white">Order Summary</h2>
+                </div>
+                <div className="px-5 py-4 space-y-3">
+                  {cart.map((item) => (
+                    <div key={item.id} className="flex justify-between text-sm text-gray-600">
+                      <span className="truncate mr-2">{item.name} <span className="text-gray-400">×{item.quantity}</span></span>
+                      <span className="flex-shrink-0 font-medium">{CURRENCY}{(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                  <div className="border-t border-gray-100 pt-3 space-y-2">
+                    <div className="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>{CURRENCY}{total.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Shipping</span>
+                      <span className={freeShippingUnlocked ? 'text-green-500 font-medium' : 'text-gray-600'}>{freeShippingUnlocked ? 'Free' : `${CURRENCY}5.00`}</span>
+                    </div>
+                  </div>
+                  <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
+                    <span className="font-semibold text-gray-900">Total</span>
+                    <span className="text-xl font-bold" style={{ color: '#8B1538' }}>{CURRENCY}{(freeShippingUnlocked ? total : total + 5).toFixed(2)}</span>
+                  </div>
+                  {/* Promo */}
+                  <div className="pt-1">
+                    <div className="flex gap-2">
+                      <div className="flex-1 flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2">
+                        <Tag className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                        <input type="text" className="flex-1 text-sm outline-none placeholder:text-gray-400 bg-transparent" placeholder="Promo code" value={promoCode} onChange={(e) => { setPromoCode(e.target.value); setPromoError('') }} />
+                      </div>
+                      <button onClick={() => setPromoError('Invalid or expired promo code.')} style={{ backgroundColor: '#8B1538' }} className="text-white text-sm font-medium px-4 rounded-lg flex-shrink-0">Apply</button>
+                    </div>
+                    {promoError && <p className="text-red-400 text-xs mt-1">{promoError}</p>}
+                  </div>
+                  {/* CTA */}
+                  <div className="pt-1">
+                    {step === 'cart' && (
+                      <button onClick={() => setStep('shipping')} style={{ backgroundColor: '#8B1538' }} className="w-full text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                        Proceed to Checkout <ArrowRight className="w-4 h-4" />
+                      </button>
+                    )}
+                    {step === 'shipping' && (
+                      <button onClick={handlePlaceOrder} disabled={!isShippingValid || isPending} style={{ backgroundColor: '#8B1538' }} className="w-full text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> Placing Order...</> : 'Place Order'}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-gray-400 pb-1">
+                    <Lock className="w-3 h-3" /> Secure &amp; encrypted payment
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
