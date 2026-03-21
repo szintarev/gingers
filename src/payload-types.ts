@@ -212,6 +212,7 @@ export interface Page {
     | HeroBlock
     | PartnershipBlock
     | ProductsBlock
+    | CartBlock
   )[];
   meta?: {
     title?: string | null;
@@ -624,6 +625,15 @@ export interface ProductsBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CartBlock".
+ */
+export interface CartBlock {
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cart';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -944,6 +954,7 @@ export interface PagesSelect<T extends boolean = true> {
         hero?: T | HeroBlockSelect<T>;
         partnership?: T | PartnershipBlockSelect<T>;
         products?: T | ProductsBlockSelect<T>;
+        cart?: T | CartBlockSelect<T>;
       };
   meta?:
     | T
@@ -1199,6 +1210,14 @@ export interface ProductsBlockSelect<T extends boolean = true> {
   label?: T;
   title?: T;
   description?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CartBlock_select".
+ */
+export interface CartBlockSelect<T extends boolean = true> {
   id?: T;
   blockName?: T;
 }

@@ -13,6 +13,7 @@ import { ImageCarouselBlock } from '@/blocks/ImageCarousel/Component'
 import { HeroBlock } from '@/blocks/Hero/Component'
 import { PartnershipBlock } from '@/blocks/Partnership/Component'
 import { ProductsBlockComponent } from '@/blocks/Products/Component'
+import { CartBlockComponent } from '@/blocks/Cart/Component'
 
 const blockComponents = {
   cta: CallToActionBlock,
@@ -26,6 +27,7 @@ const blockComponents = {
   hero: HeroBlock,
   partnership: PartnershipBlock,
   products: ProductsBlockComponent,
+  cart: CartBlockComponent,
 }
 
 export const RenderBlocks: React.FC<{
@@ -45,6 +47,9 @@ export const RenderBlocks: React.FC<{
             const Block = blockComponents[blockType as keyof typeof blockComponents]
 
             if (Block) {
+              if (blockType === 'cart') {
+                return <Block key={index} {...(block as any)} disableInnerContainer />
+              }
               return (
                 <div className="py-16" key={index}>
                   <Block {...(block as any)} disableInnerContainer />
