@@ -38,17 +38,7 @@ export const FarmStepsBlock: React.FC<FarmStepsBlockProps> = ({ label, title, de
         }}
       />
 
-      {/* Top wave */}
-      <div className="absolute top-0 left-0 right-0 leading-none">
-        <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full block">
-          <path
-            d="M0 0L48 8C96 16 192 32 288 38C384 44 480 40 576 36C672 32 768 28 864 30C960 32 1056 40 1152 42C1248 44 1344 40 1392 38L1440 36V0H1392C1344 0 1248 0 1152 0C1056 0 960 0 864 0C768 0 672 0 576 0C480 0 384 0 288 0C192 0 96 0 48 0H0Z"
-            fill="white"
-          />
-        </svg>
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10 pt-16">
+      <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
         <div className="text-center pb-16">
           <div className="inline-flex items-center gap-3 pb-5">

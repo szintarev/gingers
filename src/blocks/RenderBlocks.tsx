@@ -51,7 +51,7 @@ export const RenderBlocks: React.FC<{
                 return <Block key={index} {...(block as any)} disableInnerContainer />
               }
               return (
-                <div className="py-16" key={index}>
+                <div key={index}>
                   <Block {...(block as any)} disableInnerContainer />
                 </div>
               )

@@ -21,7 +21,7 @@ export const FeaturesBlock: React.FC<FeaturesBlockProps> = ({
   return (
     <section className="py-24 bg-gradient-to-b from-[#6B0F2B] via-[#8B1538] to-[#6B0F2B] relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center pb-16">
+        <div className="text-center">
           <div className="inline-flex items-center gap-2 pb-4">
             <div className="h-px w-12 bg-white/50" />
             <div className="text-white/70 uppercase tracking-wider text-sm">
