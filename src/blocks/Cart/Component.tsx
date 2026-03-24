@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useCart, type ShippingInfo } from '@/contexts/CartContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { COUNTRIES } from '@/lib/countries'
+import { sendOrderEmail } from '@/lib/sendOrderEmail'
 
 const CURRENCY = '€'
 
@@ -49,6 +50,8 @@ export function CartBlockComponent() {
           body: JSON.stringify({ cart, shipping }),
         })
         if (!res.ok) throw new Error()
+        const { orderNumber } = await res.json()
+        await sendOrderEmail(cart, shipping, orderNumber)
         clearCart()
         setStep('success')
       } catch {

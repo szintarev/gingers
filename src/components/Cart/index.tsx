@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useCart, type ShippingInfo } from '@/contexts/CartContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { COUNTRIES } from '@/lib/countries'
+import { sendOrderEmail } from '@/lib/sendOrderEmail'
 
 const EMPTY_SHIPPING: ShippingInfo = {
   firstName: '',
@@ -51,6 +52,8 @@ export function CartDrawer() {
           body: JSON.stringify({ cart, shipping }),
         })
         if (!res.ok) throw new Error()
+        const { orderNumber } = await res.json()
+        await sendOrderEmail(cart, shipping, orderNumber)
         clearCart()
         setStep('success')
       } catch {
