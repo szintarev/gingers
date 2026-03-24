@@ -1,69 +1,73 @@
-import { Banner } from '@payloadcms/ui/elements/Banner'
 import React from 'react'
-
-import { SeedButton } from './SeedButton'
+import { getPayload } from 'payload'
+import config from '@payload-config'
+import MetricsCharts, { type MetricsData } from './MetricsCharts'
 import './index.scss'
 
-const baseClass = 'before-dashboard'
+async function fetchMetrics(): Promise<MetricsData> {
+  const payload = await getPayload({ config })
 
-const BeforeDashboard: React.FC = () => {
-  return (
-    <div className={baseClass}>
-      <Banner className={`${baseClass}__banner`} type="success">
-        <h4>Welcome to your dashboard!</h4>
-      </Banner>
-      Here&apos;s what to do next:
-      <ul className={`${baseClass}__instructions`}>
-        <li>
-          <SeedButton />
-          {' with a few pages, posts, and projects to jump-start your new site, then '}
-          <a href="/" target="_blank">
-            visit your website
-          </a>
-          {' to see the results.'}
-        </li>
-        <li>
-          {'Modify your '}
-          <a
-            href="https://payloadcms.com/docs/configuration/collections"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            collections
-          </a>
-          {' and add more '}
-          <a
-            href="https://payloadcms.com/docs/fields/overview"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            fields
-          </a>
-          {' as needed. If you are new to Payload, we also recommend you check out the '}
-          <a
-            href="https://payloadcms.com/docs/getting-started/what-is-payload"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Getting Started
-          </a>
-          {' docs.'}
-        </li>
-        <li>
-          Commit and push your changes to the repository to trigger a redeployment of your project.
-        </li>
-      </ul>
-      {'Pro Tip: This block is a '}
-      <a
-        href="https://payloadcms.com/docs/custom-components/overview"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        custom component
-      </a>
-      , you can remove it at any time by updating your <strong>payload.config</strong>.
-    </div>
-  )
+  const { docs: orders } = await payload.find({
+    collection: 'orders',
+    limit: 10000,
+    overrideAccess: true,
+    select: { orderNumber: true, total: true, status: true, createdAt: true, items: true },
+  })
+
+  // KPIs
+  const totalOrders = orders.length
+  const totalRevenue = orders.reduce((s, o) => s + (o.total ?? 0), 0)
+  const avgOrderValue = totalOrders ? totalRevenue / totalOrders : 0
+  const now = new Date()
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  const ordersThisMonth = orders.filter((o) => new Date(o.createdAt) >= monthStart).length
+
+  // Daily breakdown — last 30 days
+  const days: Record<string, { orders: number; revenue: number }> = {}
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now)
+    d.setDate(d.getDate() - i)
+    const key = d.toISOString().slice(0, 10)
+    days[key] = { orders: 0, revenue: 0 }
+  }
+  for (const o of orders) {
+    const key = new Date(o.createdAt).toISOString().slice(0, 10)
+    if (days[key]) {
+      days[key].orders++
+      days[key].revenue += o.total ?? 0
+    }
+  }
+  const dailyOrders = Object.entries(days).map(([date, v]) => ({ date: date.slice(5), ...v }))
+
+  // Status counts
+  const statusMap: Record<string, number> = {}
+  for (const o of orders) {
+    const s = o.status ?? 'pending'
+    statusMap[s] = (statusMap[s] ?? 0) + 1
+  }
+  const statusCounts = Object.entries(statusMap).map(([status, count]) => ({ status, count }))
+
+  // Top 5 products by revenue
+  const productMap: Record<string, { revenue: number; qty: number }> = {}
+  for (const o of orders) {
+    if (!Array.isArray(o.items)) continue
+    for (const item of o.items as { productName: string; subtotal: number; quantity: number }[]) {
+      if (!productMap[item.productName]) productMap[item.productName] = { revenue: 0, qty: 0 }
+      productMap[item.productName].revenue += item.subtotal ?? 0
+      productMap[item.productName].qty += item.quantity ?? 0
+    }
+  }
+  const topProducts = Object.entries(productMap)
+    .map(([name, v]) => ({ name, ...v }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 5)
+
+  return { kpis: { totalOrders, totalRevenue, avgOrderValue, ordersThisMonth }, dailyOrders, statusCounts, topProducts }
+}
+
+const BeforeDashboard: React.FC = async () => {
+  const metrics = await fetchMetrics()
+  return <MetricsCharts data={metrics} />
 }
 
 export default BeforeDashboard

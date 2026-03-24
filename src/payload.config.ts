@@ -13,6 +13,7 @@ import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import { Products } from './collections/Products'
+import { Orders } from './collections/Orders'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -78,7 +79,7 @@ export default buildConfig({
       connectionString: process.env.POSTGRES_URL || '',
     },
   }),
-  collections: [Pages, Media, Users, Products],
+  collections: [Pages, Media, Users, Products, Orders],
   cors: [getServerSideURL()].filter(Boolean),
   plugins: [
     ...plugins,

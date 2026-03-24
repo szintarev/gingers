@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 import type { CartItem, ShippingInfo } from '@/contexts/CartContext'
 
 function generateOrderNumber(): string {
@@ -15,7 +17,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid order data' }, { status: 400 })
     }
 
+    const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0)
     const orderNumber = generateOrderNumber()
+
+    const payload = await getPayload({ config })
+
+    await payload.create({
+      collection: 'orders',
+      data: {
+        orderNumber,
+        status: 'pending',
+        customerName: `${shipping.firstName} ${shipping.lastName}`,
+        customerEmail: shipping.email,
+        customerPhone: shipping.phone ?? '',
+        customerAddress: shipping.address,
+        customerCity: shipping.city,
+        customerState: shipping.state ?? '',
+        customerCountry: shipping.country,
+        customerPostal: shipping.postalCode,
+        customerNotes: shipping.notes ?? '',
+        items: cart.map((item) => ({
+          productName: item.name,
+          productImage: item.image ?? '',
+          quantity: item.quantity,
+          unitPrice: item.price,
+          subtotal: item.price * item.quantity,
+        })),
+        total,
+      },
+    })
+
     return NextResponse.json({ success: true, orderNumber })
   } catch (err) {
     console.error('Order error:', err)
