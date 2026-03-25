@@ -14,6 +14,8 @@ import { Hero } from '../../blocks/Hero/config'
 import { Partnership } from '../../blocks/Partnership/config'
 import { ProductsBlock } from '../../blocks/Products/config'
 import { CartBlock } from '../../blocks/Cart/config'
+import { SingleProductBlock } from '../../blocks/SingleProduct/config'
+import { ProductsGridBlock } from '../../blocks/ProductsGrid/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -77,7 +79,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Process, FarmSteps, Testimonials, Stats, About, Features, ImageCarousel, Hero, Partnership, ProductsBlock, CartBlock],
+              blocks: [CallToAction, Process, FarmSteps, Testimonials, Stats, About, Features, ImageCarousel, Hero, Partnership, ProductsBlock, CartBlock, SingleProductBlock, ProductsGridBlock],
               required: true,
               admin: {
                 initCollapsed: true,

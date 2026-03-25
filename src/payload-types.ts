@@ -215,6 +215,8 @@ export interface Page {
     | PartnershipBlock
     | ProductsBlock
     | CartBlock
+    | SingleProductBlock
+    | ProductsGridBlock
   )[];
   meta?: {
     title?: string | null;
@@ -644,29 +646,13 @@ export interface CartBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "SingleProductBlock".
  */
-export interface User {
-  id: number;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
+export interface SingleProductBlock {
+  product: number | Product;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'singleProduct';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -708,6 +694,44 @@ export interface Product {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductsGridBlock".
+ */
+export interface ProductsGridBlock {
+  label: string;
+  title: string;
+  description?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productsGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1001,6 +1025,8 @@ export interface PagesSelect<T extends boolean = true> {
         partnership?: T | PartnershipBlockSelect<T>;
         products?: T | ProductsBlockSelect<T>;
         cart?: T | CartBlockSelect<T>;
+        singleProduct?: T | SingleProductBlockSelect<T>;
+        productsGrid?: T | ProductsGridBlockSelect<T>;
       };
   meta?:
     | T
@@ -1264,6 +1290,26 @@ export interface ProductsBlockSelect<T extends boolean = true> {
  * via the `definition` "CartBlock_select".
  */
 export interface CartBlockSelect<T extends boolean = true> {
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SingleProductBlock_select".
+ */
+export interface SingleProductBlockSelect<T extends boolean = true> {
+  product?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductsGridBlock_select".
+ */
+export interface ProductsGridBlockSelect<T extends boolean = true> {
+  label?: T;
+  title?: T;
+  description?: T;
   id?: T;
   blockName?: T;
 }

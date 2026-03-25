@@ -14,6 +14,8 @@ import { HeroBlock } from '@/blocks/Hero/Component'
 import { PartnershipBlock } from '@/blocks/Partnership/Component'
 import { ProductsBlockComponent } from '@/blocks/Products/Component'
 import { CartBlockComponent } from '@/blocks/Cart/Component'
+import { SingleProductBlockComponent } from '@/blocks/SingleProduct/Component'
+import { ProductsGridBlockComponent } from '@/blocks/ProductsGrid/Component'
 
 const blockComponents = {
   cta: CallToActionBlock,
@@ -28,6 +30,8 @@ const blockComponents = {
   partnership: PartnershipBlock,
   products: ProductsBlockComponent,
   cart: CartBlockComponent,
+  singleProduct: SingleProductBlockComponent,
+  productsGrid: ProductsGridBlockComponent,
 }
 
 export const RenderBlocks: React.FC<{

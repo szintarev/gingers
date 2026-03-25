@@ -47,3 +47,27 @@ export const getCachedProduct = (slug: string, locale = 'en') =>
     [`products_${slug}`, locale],
     { tags: [`products_${slug}`, 'products'], revalidate: 3600 },
   )
+
+async function fetchProductById(id: number, locale: string): Promise<Product | null> {
+  const payload = await getPayload({ config: configPromise })
+
+  try {
+    const result = await payload.findByID({
+      collection: 'products',
+      id,
+      depth: 1,
+      overrideAccess: false,
+      locale: locale as any,
+    })
+    return result ?? null
+  } catch {
+    return null
+  }
+}
+
+export const getCachedProductById = (id: number, locale = 'en') =>
+  unstable_cache(
+    () => fetchProductById(id, locale),
+    [`products_id_${id}`, locale],
+    { tags: [`products_id_${id}`, 'products'], revalidate: 3600 },
+  )
