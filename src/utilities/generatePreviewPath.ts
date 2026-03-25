@@ -1,4 +1,5 @@
 import { PayloadRequest, CollectionSlug } from 'payload'
+import { getServerSideURL } from './getURL'
 
 const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
   pages: '',
@@ -19,14 +20,20 @@ export const generatePreviewPath = ({ collection, slug }: Props) => {
   // Encode to support slugs with special characters
   const encodedSlug = encodeURIComponent(slug)
 
+  const path =
+    slug === 'home'
+      ? '/'
+      : `${collectionPrefixMap[collection]}/${encodedSlug}`
+
   const encodedParams = new URLSearchParams({
     slug: encodedSlug,
     collection,
-    path: `${collectionPrefixMap[collection]}/${encodedSlug}`,
+    path,
     previewSecret: process.env.PREVIEW_SECRET || '',
   })
 
-  const url = `/next/preview?${encodedParams.toString()}`
+  // Must be absolute so Payload's live preview iframe can load it
+  const url = `${getServerSideURL()}/next/preview?${encodedParams.toString()}`
 
   return url
 }
