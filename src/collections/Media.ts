@@ -43,8 +43,6 @@ export const Media: CollectionConfig = {
     staticDir: path.resolve(dirname, '../../public/media'),
     adminThumbnail: 'thumbnail',
     focalPoint: true,
-    // 20 MB — enough headroom for 4K images
-    maxFileSize: 20971520,
     imageSizes: [
       {
         name: 'thumbnail',

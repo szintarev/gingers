@@ -36,6 +36,12 @@ const nextConfig = {
 
     return webpackConfig
   },
+  // Allow uploads up to 20 MB (4K image headroom)
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '20mb',
+    },
+  },
   reactStrictMode: true,
   redirects,
 }
