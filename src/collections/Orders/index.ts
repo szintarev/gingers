@@ -24,6 +24,13 @@ export const Orders: CollectionConfig = {
       admin: { readOnly: true },
     },
     {
+      name: 'idempotencyKey',
+      type: 'text',
+      index: true,
+      unique: true,
+      admin: { readOnly: true, position: 'sidebar' },
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,

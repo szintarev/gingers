@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useTransition } from 'react'
+import React, { useState, useTransition, useRef } from 'react'
 import { X, Minus, Plus, Trash2, ShoppingBag, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useCart, type ShippingInfo } from '@/contexts/CartContext'
@@ -30,6 +30,7 @@ export function CartDrawer() {
   const [shipping, setShipping] = useState<ShippingInfo>(EMPTY_SHIPPING)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
+  const idempotencyKey = useRef(crypto.randomUUID())
 
   const selectedCountry = COUNTRIES.find((c) => c.code === shipping.country)
   const states = selectedCountry?.states ?? []
@@ -49,11 +50,12 @@ export function CartDrawer() {
         const res = await fetch('/api/order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cart, shipping }),
+          body: JSON.stringify({ cart, shipping, idempotencyKey: idempotencyKey.current }),
         })
         if (!res.ok) throw new Error()
         const { orderNumber } = await res.json()
         await sendOrderEmail(cart, shipping, orderNumber)
+        idempotencyKey.current = crypto.randomUUID()
         clearCart()
         setStep('success')
       } catch {

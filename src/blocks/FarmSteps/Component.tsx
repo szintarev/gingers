@@ -28,7 +28,7 @@ const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
 
 export const FarmStepsBlock: React.FC<FarmStepsBlockProps> = ({ label, title, description, features }) => {
   return (
-    <section className="relative py-24 overflow-hidden" style={{ backgroundColor: '#8B1538' }}>
+    <section className="relative py-24 overflow-hidden" style={{ backgroundColor: '#6B0F2B' }}>
       {/* Dot grid overlay */}
       <div
         className="absolute inset-0 pointer-events-none"

@@ -708,6 +708,7 @@ export interface Product {
 export interface Order {
   id: number;
   orderNumber: string;
+  idempotencyKey?: string | null;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   customerName: string;
   customerEmail: string;
@@ -1420,6 +1421,7 @@ export interface ProductsSelect<T extends boolean = true> {
  */
 export interface OrdersSelect<T extends boolean = true> {
   orderNumber?: T;
+  idempotencyKey?: T;
   status?: T;
   customerName?: T;
   customerEmail?: T;
