@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/Zubek/Documents/GitHub/gingers-template/src -type f \\\\\\(-name *.tsx -o -name *.ts -o -name *.jsx -o -name *.js \\\\\\))",
+      "Bash(curl -s \"https://turtlebole.com\")",
+      "WebFetch(domain:turtlebole.com)",
+      "Bash(xargs grep:*)",
+      "Bash(curl -s \"https://turtlebole.com/assets/index-A6tlzyti.css\")",
+      "Bash(grep -o \".\\\\{0,100\\\\}footer.\\\\{0,300\\\\}\")",
+      "Bash(curl -s \"https://turtlebole.com/assets/index-DjiIiYmO.js\")",
+      "Bash(grep -o \".\\\\{0,50\\\\}footer.\\\\{0,500\\\\}\")",
+      "Bash(grep -o \".\\\\{0,200\\\\}jsxs\\(\"\"footer\"\".\\\\{0,5000\\\\}\")",
+      "Bash(grep -o \".\\\\{0,500\\\\}footerProducts.\\\\{0,50\\\\}\")",
+      "Bash(grep -o \"products:\\\\[.\\\\{0,1000\\\\}legal:\\\\[.\\\\{0,300\\\\}\\\\]\")"
+    ]
+  }
+}

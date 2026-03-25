@@ -104,7 +104,6 @@ export const AboutBlock: React.FC<AboutBlockProps> = ({
             {link && (
               <div className="pt-8">
                 <CMSLink {...link} className="bg-[#8B1538] hover:bg-[#A91D3A] text-white px-8 py-3 text-base rounded-full group inline-flex items-center justify-center">
-                  {link.label}
                   <ArrowRight className="w-5 h-5 pl-2 group-hover:translate-x-1 transition-transform" />
                 </CMSLink>
               </div>

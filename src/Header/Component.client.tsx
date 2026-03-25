@@ -2,13 +2,12 @@
 
 import React, { useState } from 'react'
 import { motion, useScroll, useMotionValueEvent } from 'motion/react'
-import { ShoppingCart, Menu, X, Heart, Search } from 'lucide-react'
+import { ShoppingCart, Menu, X, Search } from 'lucide-react'
 import type { Header } from '@/payload-types'
 import { CMSLink } from '@/components/Link'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { CartDrawer } from '@/components/Cart'
 import { useCart } from '@/contexts/CartContext'
-import { useSavedItems } from '@/contexts/SavedItemsContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 interface HeaderClientProps {
@@ -18,7 +17,6 @@ interface HeaderClientProps {
 export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   const navItems = data?.navItems || []
   const { getTotalItems, openCart } = useCart()
-  const { savedItems } = useSavedItems()
   const { t } = useLanguage()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -67,20 +65,6 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
               aria-label="Search"
             >
               <Search className="w-5 h-5" />
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`hidden md:flex relative items-center justify-center w-9 h-9 rounded-md transition-colors ${interactiveItemClass}`}
-              aria-label="Saved items"
-            >
-              <Heart className="w-5 h-5" />
-              {savedItems.length > 0 && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-[#8B1538] text-white text-xs rounded-full">
-                  {savedItems.length}
-                </div>
-              )}
             </motion.button>
 
             <motion.button

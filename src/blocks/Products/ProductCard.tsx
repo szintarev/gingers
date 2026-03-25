@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Heart, ShoppingCart, Star } from 'lucide-react'
+import { ShoppingCart, Star } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 
 interface ProductCardProps {
@@ -53,13 +53,6 @@ export function ProductCard({ id, title, price, description, imageUrl, status, s
           </span>
         )}
 
-        {/* Heart — top right */}
-        <button
-          aria-label="Save product"
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:bg-white transition-colors"
-        >
-          <Heart className="w-4 h-4 text-gray-400 hover:text-red-400 transition-colors" />
-        </button>
       </div>
 
       {/* Info */}

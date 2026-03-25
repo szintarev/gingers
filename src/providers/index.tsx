@@ -6,7 +6,6 @@ import { HeaderThemeProvider } from './HeaderTheme'
 import { ThemeProvider } from './Theme'
 import { CartProvider } from '@/contexts/CartContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
-import { SavedItemsProvider } from '@/contexts/SavedItemsContext'
 
 export const Providers: React.FC<{
   children: React.ReactNode
@@ -16,9 +15,7 @@ export const Providers: React.FC<{
       <HeaderThemeProvider>
         <LanguageProvider>
           <CartProvider>
-            <SavedItemsProvider>
-              {children}
-            </SavedItemsProvider>
+            {children}
           </CartProvider>
         </LanguageProvider>
       </HeaderThemeProvider>
