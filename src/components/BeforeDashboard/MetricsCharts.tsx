@@ -108,7 +108,7 @@ export default function MetricsCharts({ data }: { data: MetricsData }) {
         type: 'bar',
         data: topProducts.map((p) => p.revenue).reverse(),
         itemStyle: { color: '#8B1538', borderRadius: [0, 4, 4, 0] },
-        label: { show: true, position: 'right', formatter: (p: { value: number }) => `€${p.value.toFixed(0)}`, fontSize: 11 },
+        label: { show: true, position: 'right', formatter: (p: unknown) => `€${Number((p as { value: number }).value).toFixed(0)}`, fontSize: 11 },
       },
     ],
   }
