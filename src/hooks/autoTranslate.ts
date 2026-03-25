@@ -74,7 +74,15 @@ function copyLocalizedFields(
         copyLocalizedFields(item, field.fields, exVal?.[i] ?? {}, blockDefs),
       )
       if (arrResults.some((r) => Object.keys(r).length > 0)) {
-        result[key] = srcVal.map((item, i) => ({ ...item, ...arrResults[i] }))
+        result[key] = srcVal.map((item, i) => {
+          const existingItem = exVal?.[i]
+          // Use existing locale item as base to preserve its IDs — prevents Payload
+          // from treating items as new rows and duplicating them.
+          // For brand-new items (no existing locale counterpart), fall back to source.
+          return existingItem
+            ? { ...existingItem, ...arrResults[i] }
+            : { ...item, ...arrResults[i] }
+        })
       }
     } else if (field.type === 'blocks' && Array.isArray(srcVal)) {
       const blockResults = srcVal.map((blockData, i) => {
@@ -83,7 +91,12 @@ function copyLocalizedFields(
         return copyLocalizedFields(blockData, blockDef.fields, exVal?.[i] ?? {}, blockDefs)
       })
       if (blockResults.some((r) => Object.keys(r).length > 0)) {
-        result[key] = srcVal.map((item, i) => ({ ...item, ...blockResults[i] }))
+        result[key] = srcVal.map((item, i) => {
+          const existingItem = exVal?.[i]
+          return existingItem
+            ? { ...existingItem, ...blockResults[i] }
+            : { ...item, ...blockResults[i] }
+        })
       }
     }
   }

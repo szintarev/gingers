@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     users: User;
     products: Product;
+    orders: Order;
     redirects: Redirect;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -89,6 +90,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -701,6 +703,38 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  orderNumber: string;
+  idempotencyKey?: string | null;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string | null;
+  customerCountry?: string | null;
+  customerCity?: string | null;
+  customerState?: string | null;
+  customerPostal?: string | null;
+  customerAddress?: string | null;
+  customerNotes?: string | null;
+  items?:
+    | {
+        productName: string;
+        productImage?: string | null;
+        quantity: number;
+        unitPrice: number;
+        subtotal: number;
+        id?: string | null;
+      }[]
+    | null;
+  total: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -851,6 +885,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1374,6 +1412,37 @@ export interface ProductsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderNumber?: T;
+  idempotencyKey?: T;
+  status?: T;
+  customerName?: T;
+  customerEmail?: T;
+  customerPhone?: T;
+  customerCountry?: T;
+  customerCity?: T;
+  customerState?: T;
+  customerPostal?: T;
+  customerAddress?: T;
+  customerNotes?: T;
+  items?:
+    | T
+    | {
+        productName?: T;
+        productImage?: T;
+        quantity?: T;
+        unitPrice?: T;
+        subtotal?: T;
+        id?: T;
+      };
+  total?: T;
   updatedAt?: T;
   createdAt?: T;
 }

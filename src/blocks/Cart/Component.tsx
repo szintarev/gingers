@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useTransition } from 'react'
+import React, { useState, useTransition, useRef } from 'react'
 import {
   ShoppingBag, Minus, Plus, Trash2, RefreshCw,
   ArrowRight, ChevronLeft, Loader2, Package,
@@ -30,6 +30,7 @@ export function CartBlockComponent() {
   const [shipping, setShipping] = useState<ShippingInfo>(EMPTY_SHIPPING)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
+  const idempotencyKey = useRef(crypto.randomUUID())
 
   const total = getTotalPrice()
   const selectedCountry = COUNTRIES.find((c) => c.code === shipping.country)
@@ -47,11 +48,12 @@ export function CartBlockComponent() {
         const res = await fetch('/api/order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cart, shipping }),
+          body: JSON.stringify({ cart, shipping, idempotencyKey: idempotencyKey.current }),
         })
         if (!res.ok) throw new Error()
         const { orderNumber } = await res.json()
         await sendOrderEmail(cart, shipping, orderNumber)
+        idempotencyKey.current = crypto.randomUUID()
         clearCart()
         setStep('success')
       } catch {

@@ -26,25 +26,21 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   const { scrollY } = useScroll()
   useMotionValueEvent(scrollY, 'change', (y) => setIsScrolled(y > 50))
 
-  const headerBg = isScrolled
-    ? 'bg-white/95 backdrop-blur-sm border-b border-gray-200'
-    : 'bg-transparent'
-  const interactiveItemClass = isScrolled
-    ? 'text-gray-700 hover:text-[#8B1538] hover:bg-gray-100'
-    : 'text-gray-200 hover:text-white hover:bg-white/10'
+  const headerBg = 'bg-white/95 backdrop-blur-sm border-b border-gray-200'
+  const interactiveItemClass = 'text-gray-700 hover:text-[#8B1538] hover:bg-gray-100'
 
   return (
     <>
     <CartDrawer />
     <header
-      style={{ top: 'var(--admin-bar-height, 0px)' }}
-      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${headerBg}`}
+      style={{ position: 'fixed', top: 'var(--admin-bar-height, 0px)', left: 0, right: 0, zIndex: 50 }}
+      className={`transition-all duration-300 ${headerBg}`}
     >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <div className="flex items-center justify-between h-20">
 
           <motion.div whileHover={{ scale: 1.05 }} className="cursor-pointer">
-            <div className={`text-lg tracking-tight font-medium whitespace-nowrap ${isScrolled ? 'text-gray-900' : 'text-white'}`}>
+            <div className="text-lg tracking-tight font-medium whitespace-nowrap text-gray-900">
               {t('title')}
             </div>
           </motion.div>

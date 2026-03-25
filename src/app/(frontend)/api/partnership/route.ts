@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { transporter } from '@/lib/mailer'
 
+const recentSubmissions = new Map<string, number>()
+const COOLDOWN_MS = 60_000
+
 export interface PartnershipFormData {
   companyName: string
   contactName: string
@@ -18,6 +21,13 @@ export async function POST(req: NextRequest) {
     if (!data.companyName || !data.email || !data.message) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
+
+    const key = data.email.toLowerCase()
+    const last = recentSubmissions.get(key) ?? 0
+    if (Date.now() - last < COOLDOWN_MS) {
+      return NextResponse.json({ success: true })
+    }
+    recentSubmissions.set(key, Date.now())
 
     const emailHtml = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a;">

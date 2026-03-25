@@ -60,7 +60,7 @@ export const AdminBar: React.FC<{
         const mutationObserver = new MutationObserver(update)
         mutationObserver.observe(el, { attributes: true, attributeFilter: ['class'] })
       }}
-      className={cn(baseClass, 'py-2 bg-black text-white', {
+      className={cn(baseClass, 'fixed top-0 left-0 right-0 z-[60] py-2 bg-black text-white', {
         block: show,
         hidden: !show,
       })}
