@@ -21,7 +21,7 @@ const EMPTY_SHIPPING: ShippingInfo = {
 type Step = 'cart' | 'shipping' | 'success'
 
 const inputClass = 'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1538]/30 focus:border-[#8B1538] transition-colors placeholder:text-gray-400 bg-white'
-const labelClass = 'block text-xs font-medium text-gray-600 mb-1.5'
+const labelClass = 'block text-xs font-medium text-gray-500 mb-1.5'
 
 export function CartBlockComponent() {
   const { cart, removeFromCart, updateQuantity, getTotalPrice, getTotalItems, clearCart } = useCart()
@@ -57,7 +57,7 @@ export function CartBlockComponent() {
         clearCart()
         setStep('success')
       } catch {
-        setError('Something went wrong. Please try again.')
+        setError(t('somethingWentWrong'))
       }
     })
   }
@@ -71,11 +71,11 @@ export function CartBlockComponent() {
           {/* Back link */}
           {step === 'shipping' ? (
             <button onClick={() => setStep('cart')} className="flex items-center gap-1 text-white/70 hover:text-white transition-colors text-sm mb-6">
-              <ChevronLeft className="w-4 h-4" /> Continue Shopping
+              <ChevronLeft className="w-4 h-4" /> {t('backToCart')}
             </button>
           ) : (
             <Link href="/" className="flex items-center gap-1 text-white/70 hover:text-white transition-colors text-sm mb-6">
-              <ChevronLeft className="w-4 h-4" /> Continue Shopping
+              <ChevronLeft className="w-4 h-4" /> {t('continueShopping')}
             </Link>
           )}
 
@@ -86,10 +86,12 @@ export function CartBlockComponent() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">
-                Your Cart
+                {step === 'success' ? t('orderReceived') : t('yourCart')}
               </h1>
               <p className="text-white/60 text-sm mt-1">
-                {step === 'success' ? 'Order placed!' : `${getTotalItems()} ${getTotalItems() === 1 ? 'item' : 'items'}`}
+                {step === 'cart' && `${getTotalItems()} ${t('items')}`}
+                {step === 'shipping' && t('shippingDetails')}
+                {step === 'success' && '✓'}
               </p>
             </div>
           </div>
@@ -109,17 +111,15 @@ export function CartBlockComponent() {
         {/* Success */}
         {step === 'success' && (
           <div className="flex flex-col items-center justify-center text-center py-20">
-            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6">
-              <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-6">
+              <svg className="w-12 h-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Order Received!</h2>
-            <p className="text-gray-500 text-sm leading-relaxed max-w-sm mb-8">
-              Thank you for your order. We&apos;ve sent a confirmation to your email and will be in touch shortly.
-            </p>
-            <Link href="/" style={{ backgroundColor: '#8B1538' }} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-xl font-medium">
-              Continue Shopping
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">{t('orderReceived')}</h2>
+            <p className="text-gray-500 text-sm leading-relaxed max-w-sm mb-8">{t('orderThankYou')}</p>
+            <Link href="/" style={{ backgroundColor: '#8B1538' }} className="inline-flex items-center gap-2 text-white px-8 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity">
+              {t('continueShopping')}
             </Link>
           </div>
         )}
@@ -127,11 +127,13 @@ export function CartBlockComponent() {
         {/* Empty cart */}
         {step === 'cart' && cart.length === 0 && (
           <div className="flex flex-col items-center justify-center text-center py-20">
-            <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
-            <p className="text-gray-700 font-medium text-lg">{t('emptyCart')}</p>
-            <p className="text-gray-400 text-sm mt-1 mb-8">{t('emptyCartDesc')}</p>
-            <Link href="/" style={{ backgroundColor: '#8B1538' }} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-xl font-medium">
-              Browse Products
+            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-5">
+              <ShoppingBag className="w-9 h-9 text-gray-300" />
+            </div>
+            <p className="text-gray-800 font-semibold text-lg mb-1">{t('emptyCart')}</p>
+            <p className="text-gray-400 text-sm mb-8">{t('emptyCartDesc')}</p>
+            <Link href="/" style={{ backgroundColor: '#8B1538' }} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity">
+              {t('browseProducts')}
             </Link>
           </div>
         )}
@@ -164,30 +166,28 @@ export function CartBlockComponent() {
                             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition-colors"
-                                style={{ color: '#374151' }}
+                                className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-600"
                               >
                                 <Minus className="w-3 h-3" />
                               </button>
-                              <span style={{ color: '#111827', minWidth: '2rem', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600 }}>
+                              <span className="text-sm font-semibold text-gray-900 min-w-[2rem] text-center">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition-colors"
-                                style={{ color: '#374151' }}
+                                className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-600"
                               >
                                 <Plus className="w-3 h-3" />
                               </button>
                             </div>
                             <button onClick={() => removeFromCart(item.id)} className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-400 transition-colors">
-                              <Trash2 className="w-3.5 h-3.5" /> Remove
+                              <Trash2 className="w-3.5 h-3.5" /> {t('remove')}
                             </button>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="font-semibold text-gray-900">{CURRENCY}{(item.price * item.quantity).toFixed(2)}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{CURRENCY}{item.price.toFixed(2)} each</p>
+                          <p className="font-bold text-gray-900">{CURRENCY}{(item.price * item.quantity).toFixed(2)}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{CURRENCY}{item.price.toFixed(2)} {t('each')}</p>
                         </div>
                       </div>
                     ))}
@@ -195,7 +195,7 @@ export function CartBlockComponent() {
 
                   <div className="flex justify-end">
                     <button onClick={clearCart} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors">
-                      <RefreshCw className="w-3.5 h-3.5" /> Clear all items
+                      <RefreshCw className="w-3.5 h-3.5" /> {t('clearAllItems')}
                     </button>
                   </div>
                 </>
@@ -204,34 +204,38 @@ export function CartBlockComponent() {
               {step === 'shipping' && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <div><label className={labelClass}>First Name *</label><input className={inputClass} value={shipping.firstName} onChange={(e) => handleShippingChange('firstName', e.target.value)} placeholder="John" /></div>
-                    <div><label className={labelClass}>Last Name *</label><input className={inputClass} value={shipping.lastName} onChange={(e) => handleShippingChange('lastName', e.target.value)} placeholder="Doe" /></div>
+                    <div><label className={labelClass}>{t('firstName')} *</label><input className={inputClass} value={shipping.firstName} onChange={(e) => handleShippingChange('firstName', e.target.value)} placeholder="John" /></div>
+                    <div><label className={labelClass}>{t('lastName')} *</label><input className={inputClass} value={shipping.lastName} onChange={(e) => handleShippingChange('lastName', e.target.value)} placeholder="Doe" /></div>
                   </div>
-                  <div><label className={labelClass}>Email Address *</label><input type="email" className={inputClass} value={shipping.email} onChange={(e) => handleShippingChange('email', e.target.value)} placeholder="john@example.com" /></div>
-                  <div><label className={labelClass}>Phone Number</label><input type="tel" className={inputClass} value={shipping.phone} onChange={(e) => handleShippingChange('phone', e.target.value)} placeholder="+1 234 567 8900" /></div>
-                  <div><label className={labelClass}>Street Address *</label><input className={inputClass} value={shipping.address} onChange={(e) => handleShippingChange('address', e.target.value)} placeholder="123 Main Street" /></div>
+                  <div><label className={labelClass}>{t('emailAddress')} *</label><input type="email" className={inputClass} value={shipping.email} onChange={(e) => handleShippingChange('email', e.target.value)} placeholder="john@example.com" /></div>
+                  <div><label className={labelClass}>{t('phoneNumber')}</label><input type="tel" className={inputClass} value={shipping.phone} onChange={(e) => handleShippingChange('phone', e.target.value)} placeholder="+1 234 567 8900" /></div>
+                  <div><label className={labelClass}>{t('streetAddress')} *</label><input className={inputClass} value={shipping.address} onChange={(e) => handleShippingChange('address', e.target.value)} placeholder="123 Main Street" /></div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div><label className={labelClass}>City *</label><input className={inputClass} value={shipping.city} onChange={(e) => handleShippingChange('city', e.target.value)} placeholder="New York" /></div>
-                    <div><label className={labelClass}>Postal Code *</label><input className={inputClass} value={shipping.postalCode} onChange={(e) => handleShippingChange('postalCode', e.target.value)} placeholder="10001" /></div>
+                    <div><label className={labelClass}>{t('city')} *</label><input className={inputClass} value={shipping.city} onChange={(e) => handleShippingChange('city', e.target.value)} placeholder="New York" /></div>
+                    <div><label className={labelClass}>{t('postalCode')} *</label><input className={inputClass} value={shipping.postalCode} onChange={(e) => handleShippingChange('postalCode', e.target.value)} placeholder="10001" /></div>
                   </div>
                   <div>
-                    <label className={labelClass}>Country *</label>
+                    <label className={labelClass}>{t('country')} *</label>
                     <select className={inputClass} value={shipping.country} onChange={(e) => handleShippingChange('country', e.target.value)}>
-                      <option value="">Select country...</option>
+                      <option value="">{t('selectCountry')}</option>
                       {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
                     </select>
                   </div>
                   {shipping.country && (
                     <div>
-                      <label className={labelClass}>State / Region</label>
+                      <label className={labelClass}>{t('stateRegion')}</label>
                       {states.length > 0
-                        ? <select className={inputClass} value={shipping.state} onChange={(e) => handleShippingChange('state', e.target.value)}><option value="">Select state...</option>{states.map((s) => <option key={s.code} value={s.name}>{s.name}</option>)}</select>
-                        : <input className={inputClass} value={shipping.state} onChange={(e) => handleShippingChange('state', e.target.value)} placeholder="Region / Province" />
+                        ? <select className={inputClass} value={shipping.state} onChange={(e) => handleShippingChange('state', e.target.value)}><option value="">{t('selectState')}</option>{states.map((s) => <option key={s.code} value={s.name}>{s.name}</option>)}</select>
+                        : <input className={inputClass} value={shipping.state} onChange={(e) => handleShippingChange('state', e.target.value)} placeholder={t('stateRegion')} />
                       }
                     </div>
                   )}
-                  <div><label className={labelClass}>Order Notes</label><textarea className={`${inputClass} resize-none`} rows={3} value={shipping.notes} onChange={(e) => handleShippingChange('notes', e.target.value)} placeholder="Special delivery instructions, allergies, etc." /></div>
-                  {error && <p className="text-red-500 text-sm">{error}</p>}
+                  <div><label className={labelClass}>{t('orderNotes')}</label><textarea className={`${inputClass} resize-none`} rows={3} value={shipping.notes} onChange={(e) => handleShippingChange('notes', e.target.value)} placeholder={t('deliveryInstructions')} /></div>
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
+                      <p className="text-red-600 text-sm">{error}</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -241,7 +245,7 @@ export function CartBlockComponent() {
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-24">
                 <div style={{ backgroundColor: '#8B1538' }} className="px-5 py-4 flex items-center gap-2">
                   <Package className="w-5 h-5 text-white/80" />
-                  <h2 className="font-semibold text-white">Order Summary</h2>
+                  <h2 className="font-semibold text-white">{t('orderSummary')}</h2>
                 </div>
                 <div className="px-5 py-4 space-y-3">
                   {cart.map((item) => (
@@ -251,24 +255,24 @@ export function CartBlockComponent() {
                     </div>
                   ))}
                   <div className="border-t border-gray-100 pt-3 space-y-2">
-                    <div className="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>{CURRENCY}{total.toFixed(2)}</span></div>
-                    <div className="flex justify-between text-sm text-gray-600"><span>Shipping</span><span>Calculated at checkout</span></div>
+                    <div className="flex justify-between text-sm text-gray-600"><span>{t('subtotal')}</span><span>{CURRENCY}{total.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-sm text-gray-600"><span>{t('shippingCost')}</span><span className="text-gray-400 text-xs">{t('calculatedAtCheckout')}</span></div>
                   </div>
                   <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
-                    <span className="font-semibold text-gray-900">Total</span>
+                    <span className="font-semibold text-gray-900">{t('total')}</span>
                     <span className="text-xl font-bold" style={{ color: '#8B1538' }}>{CURRENCY}{total.toFixed(2)}</span>
                   </div>
 
                   {/* CTA */}
                   <div className="pt-2">
                     {step === 'cart' && (
-                      <button onClick={() => setStep('shipping')} style={{ backgroundColor: '#8B1538' }} className="w-full text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
-                        Proceed to Checkout <ArrowRight className="w-4 h-4" />
+                      <button onClick={() => setStep('shipping')} style={{ backgroundColor: '#8B1538' }} className="w-full text-white py-3.5 rounded-xl font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+                        {t('proceedToCheckout')} <ArrowRight className="w-4 h-4" />
                       </button>
                     )}
                     {step === 'shipping' && (
-                      <button onClick={handlePlaceOrder} disabled={!isShippingValid || isPending} style={{ backgroundColor: '#8B1538' }} className="w-full text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                        {isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> Placing Order...</> : 'Place Order'}
+                      <button onClick={handlePlaceOrder} disabled={!isShippingValid || isPending} style={{ backgroundColor: '#8B1538' }} className="w-full text-white py-3.5 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">
+                        {isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('placingOrder')}</> : t('placeOrder')}
                       </button>
                     )}
                   </div>

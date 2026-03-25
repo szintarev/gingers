@@ -1,28 +1,69 @@
 'use client'
 
 import React, { useState, useTransition, useRef } from 'react'
-import { X, Minus, Plus, Trash2, ShoppingBag, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
+import { ShoppingBag, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useCart, type ShippingInfo } from '@/contexts/CartContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { COUNTRIES } from '@/lib/countries'
 import { sendOrderEmail } from '@/lib/sendOrderEmail'
 
+const CURRENCY = '€'
+
 const EMPTY_SHIPPING: ShippingInfo = {
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  address: '',
-  city: '',
-  postalCode: '',
-  country: '',
-  state: '',
-  notes: '',
+  firstName: '', lastName: '', email: '', phone: '',
+  address: '', city: '', postalCode: '', country: '', state: '', notes: '',
 }
 
 type CheckoutStep = 'cart' | 'shipping' | 'success'
 
+/* ── Inline SVGs ── */
+function CloseIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+}
+
+function MinusIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  )
+}
+
+function RemoveIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  )
+}
+
+/* ── Main drawer ── */
 export function CartDrawer() {
   const { cart, isOpen, closeCart, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCart()
   const { t } = useLanguage()
@@ -36,11 +77,9 @@ export function CartDrawer() {
   const states = selectedCountry?.states ?? []
 
   function handleShippingChange(field: keyof ShippingInfo, value: string) {
-    setShipping((prev) => {
-      // Reset state when country changes since states differ per country
-      if (field === 'country') return { ...prev, country: value, state: '' }
-      return { ...prev, [field]: value }
-    })
+    setShipping((prev) =>
+      field === 'country' ? { ...prev, country: value, state: '' } : { ...prev, [field]: value }
+    )
   }
 
   function handlePlaceOrder() {
@@ -59,14 +98,13 @@ export function CartDrawer() {
         clearCart()
         setStep('success')
       } catch {
-        setError('Something went wrong. Please try again.')
+        setError(t('somethingWentWrong'))
       }
     })
   }
 
   function handleClose() {
     closeCart()
-    // Reset to cart step after drawer closes
     setTimeout(() => {
       setStep('cart')
       setShipping(EMPTY_SHIPPING)
@@ -75,13 +113,8 @@ export function CartDrawer() {
   }
 
   const isShippingValid =
-    shipping.firstName &&
-    shipping.lastName &&
-    shipping.email &&
-    shipping.address &&
-    shipping.city &&
-    shipping.postalCode &&
-    shipping.country
+    shipping.firstName && shipping.lastName && shipping.email &&
+    shipping.address && shipping.city && shipping.postalCode && shipping.country
 
   return (
     <AnimatePresence>
@@ -92,8 +125,9 @@ export function CartDrawer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/50 z-50"
+            className="fixed inset-0 bg-black/40 z-[55] backdrop-blur-sm"
           />
 
           {/* Drawer */}
@@ -102,40 +136,67 @@ export function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white z-50 flex flex-col shadow-2xl"
+            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white z-[55] flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-              {step === 'shipping' && (
-                <button
-                  onClick={() => setStep('cart')}
-                  className="flex items-center gap-1 text-gray-500 hover:text-gray-800 transition-colors text-sm"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Back
-                </button>
-              )}
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <ShoppingBag className="w-5 h-5 text-[#8B1538]" />
-                {step === 'cart' && t('yourCart')}
-                {step === 'shipping' && 'Shipping Details'}
-                {step === 'success' && 'Order Placed!'}
-              </h2>
+            <div className="flex items-center justify-between px-6 h-14 border-b border-gray-100 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                {step === 'shipping' && (
+                  <button
+                    onClick={() => setStep('cart')}
+                    className="text-gray-400 hover:text-gray-700 transition-colors -ml-1 p-1"
+                    aria-label={t('back')}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                )}
+                <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  {step !== 'success' && <ShoppingBag className="w-4 h-4 text-[#8B1538]" />}
+                  {step === 'cart' && t('yourCart')}
+                  {step === 'shipping' && t('shippingDetails')}
+                  {step === 'success' && t('orderReceived')}
+                </h2>
+              </div>
               <button
                 onClick={handleClose}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="Close cart"
+                className="text-gray-500 hover:text-red-500 transition-colors p-1 -mr-1"
+                aria-label="Close"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <CloseIcon size={16} />
               </button>
             </div>
+
+            {/* Step tabs */}
+            {step !== 'success' && (
+              <div className="flex border-b border-gray-100 flex-shrink-0">
+                {(['cart', 'shipping'] as const).map((s, i) => {
+                  const active = step === s
+                  return (
+                    <div key={s} className="relative flex-1">
+                      <div className={`px-6 py-2.5 text-xs font-medium transition-colors ${active ? 'text-gray-900' : 'text-gray-400'}`}>
+                        {i + 1}. {s === 'cart' ? t('yourCart') : t('shippingDetails')}
+                      </div>
+                      {active && (
+                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#8B1538]" />
+                      )}
+                    </div>
+                  )
+                })}
+                <div className="relative flex-1">
+                  <div className="px-6 py-2.5 text-xs font-medium text-gray-400">
+                    3. {t('orderPlaced')}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto">
               {step === 'cart' && (
-                <CartItems
+                <CartStep
                   removeFromCart={removeFromCart}
                   updateQuantity={updateQuantity}
+                  clearCart={clearCart}
                   t={t}
                 />
               )}
@@ -145,38 +206,37 @@ export function CartDrawer() {
                   states={states}
                   onChange={handleShippingChange}
                   error={error}
+                  t={t}
                 />
               )}
-              {step === 'success' && <OrderSuccess />}
+              {step === 'success' && <OrderSuccess t={t} onClose={handleClose} />}
             </div>
 
             {/* Footer */}
             {step !== 'success' && cart.length > 0 && (
-              <div className="border-t border-gray-100 px-6 py-5 space-y-4">
-                <div className="flex justify-between text-base font-semibold text-gray-900">
-                  <div>Total</div>
-                  <div>${getTotalPrice().toFixed(2)}</div>
+              <div className="border-t border-gray-100 px-6 py-5 space-y-4 flex-shrink-0">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">{t('total')}</span>
+                  <span className="text-lg font-bold text-gray-900 tabular-nums">{CURRENCY}{getTotalPrice().toFixed(2)}</span>
                 </div>
                 {step === 'cart' && (
                   <button
                     onClick={() => setStep('shipping')}
-                    className="w-full bg-[#8B1538] text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-[#6B0F2B] transition-colors"
+                    className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-colors"
                   >
-                    Proceed to Checkout
-                    <ChevronRight className="w-4 h-4" />
+                    {t('proceedToCheckout')} <ChevronRight className="w-4 h-4" />
                   </button>
                 )}
                 {step === 'shipping' && (
                   <button
                     onClick={handlePlaceOrder}
                     disabled={!isShippingValid || isPending}
-                    className="w-full bg-[#8B1538] text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-[#6B0F2B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    {isPending ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" /> Placing Order...</>
-                    ) : (
-                      'Place Order'
-                    )}
+                    {isPending
+                      ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('placingOrder')}</>
+                      : t('placeOrder')
+                    }
                   </button>
                 )}
               </div>
@@ -188,231 +248,162 @@ export function CartDrawer() {
   )
 }
 
-function CartItems({
+/* ── Cart step ── */
+function CartStep({
   removeFromCart,
   updateQuantity,
+  clearCart,
   t,
 }: {
   removeFromCart: (id: number) => void
   updateQuantity: (id: number, qty: number) => void
+  clearCart: () => void
   t: (key: string) => string
 }) {
   const { cart } = useCart()
 
   if (cart.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full py-20 text-center px-6">
-        <ShoppingBag className="w-16 h-16 text-gray-200 pb-4" />
-        <p className="text-gray-500 font-medium">{t('emptyCart')}</p>
-        <p className="text-gray-400 text-sm pt-1">{t('emptyCartDesc')}</p>
+      <div className="flex flex-col items-center justify-center h-full py-24 text-center px-8">
+        <ShoppingBag className="w-10 h-10 text-gray-200 mb-4" />
+        <p className="text-sm font-medium text-gray-700 mb-1">{t('emptyCart')}</p>
+        <p className="text-xs text-gray-400">{t('emptyCartDesc')}</p>
       </div>
     )
   }
 
   return (
-    <div className="px-6 py-4 space-y-4">
-      {cart.map((item) => (
-        <div key={item.id} className="flex gap-4 py-4 border-b border-gray-50 last:border-0">
-          {item.image && (
-            <img
-              src={item.image}
-              alt={item.name}
-              className="w-16 h-16 object-cover rounded-lg bg-gray-100 flex-shrink-0"
-            />
-          )}
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-gray-900 text-sm truncate">{item.name}</p>
-            {item.weight && <p className="text-gray-400 text-xs pt-0.5">{item.weight}</p>}
-            <p className="text-[#8B1538] font-semibold text-sm pt-1">${item.price.toFixed(2)}</p>
-            <div className="flex items-center gap-2 pt-2">
-              <button
-                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
-              >
-                <Minus className="w-3 h-3 text-gray-600" />
-              </button>
-              <div className="text-sm font-medium w-6 text-center">{item.quantity}</div>
-              <button
-                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
-              >
-                <Plus className="w-3 h-3 text-gray-600" />
-              </button>
+    <div>
+      <ul className="divide-y divide-gray-100">
+        {cart.map((item) => (
+          <li key={item.id} className="flex gap-4 px-6 py-4">
+            {item.image
+              ? <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg bg-gray-50 flex-shrink-0" />
+              : <div className="w-16 h-16 rounded-lg bg-gray-100 flex-shrink-0" />
+            }
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
+                <button
+                  onClick={() => removeFromCart(item.id)}
+                  className="flex-shrink-0 text-gray-500 hover:text-red-500 transition-colors"
+                  aria-label={t('remove')}
+                >
+                  <RemoveIcon />
+                </button>
+              </div>
+              <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    className="w-7 h-7 flex items-center justify-center text-[#8B1538] hover:bg-[#8B1538]/10 transition-colors"
+                  >
+                    <MinusIcon />
+                  </button>
+                  <span className="text-xs font-semibold text-gray-900 w-6 text-center tabular-nums select-none">
+                    {item.quantity}
+                  </span>
+                  <button
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    className="w-7 h-7 flex items-center justify-center text-[#8B1538] hover:bg-[#8B1538]/10 transition-colors"
+                  >
+                    <PlusIcon />
+                  </button>
+                </div>
+                <p className="text-sm font-semibold text-[#8B1538] tabular-nums">
+                  {CURRENCY}{(item.price * item.quantity).toFixed(2)}
+                </p>
+              </div>
             </div>
-          </div>
-          <button
-            onClick={() => removeFromCart(item.id)}
-            className="text-gray-300 hover:text-red-400 transition-colors self-start pt-1"
-            aria-label="Remove item"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      ))}
+          </li>
+        ))}
+      </ul>
+
+      {/* Clear cart */}
+      <div className="px-6 py-3 border-t border-gray-100">
+        <button
+          onClick={clearCart}
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          {t('clearAllItems')}
+        </button>
+      </div>
     </div>
   )
 }
 
+/* ── Shipping form ── */
 function ShippingForm({
   shipping,
   states,
   onChange,
   error,
+  t,
 }: {
   shipping: ShippingInfo
   states: { code: string; name: string }[]
   onChange: (field: keyof ShippingInfo, value: string) => void
   error: string
+  t: (key: string) => string
 }) {
-  const inputClass = 'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1538]/30 focus:border-[#8B1538] transition-colors placeholder:text-gray-400'
-  const labelClass = 'block text-xs font-medium text-gray-600 mb-1.5'
+  const input = 'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1538]/25 focus:border-[#8B1538] transition-colors placeholder:text-gray-300 bg-white'
+  const label = 'block text-xs font-medium text-gray-500 mb-1.5'
 
   return (
-    <div className="px-6 py-4 space-y-4">
+    <div className="px-6 py-5 space-y-3">
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className={labelClass}>First Name *</label>
-          <input
-            className={inputClass}
-            value={shipping.firstName}
-            onChange={(e) => onChange('firstName', e.target.value)}
-            placeholder="John"
-          />
-        </div>
-        <div>
-          <label className={labelClass}>Last Name *</label>
-          <input
-            className={inputClass}
-            value={shipping.lastName}
-            onChange={(e) => onChange('lastName', e.target.value)}
-            placeholder="Doe"
-          />
-        </div>
+        <div><label className={label}>{t('firstName')} *</label><input className={input} value={shipping.firstName} onChange={(e) => onChange('firstName', e.target.value)} placeholder="John" /></div>
+        <div><label className={label}>{t('lastName')} *</label><input className={input} value={shipping.lastName} onChange={(e) => onChange('lastName', e.target.value)} placeholder="Doe" /></div>
       </div>
-
-      <div>
-        <label className={labelClass}>Email Address *</label>
-        <input
-          type="email"
-          className={inputClass}
-          value={shipping.email}
-          onChange={(e) => onChange('email', e.target.value)}
-          placeholder="john@example.com"
-        />
-      </div>
-
-      <div>
-        <label className={labelClass}>Phone Number</label>
-        <input
-          type="tel"
-          className={inputClass}
-          value={shipping.phone}
-          onChange={(e) => onChange('phone', e.target.value)}
-          placeholder="+1 234 567 8900"
-        />
-      </div>
-
-      <div>
-        <label className={labelClass}>Street Address *</label>
-        <input
-          className={inputClass}
-          value={shipping.address}
-          onChange={(e) => onChange('address', e.target.value)}
-          placeholder="123 Main Street"
-        />
-      </div>
-
+      <div><label className={label}>{t('emailAddress')} *</label><input type="email" className={input} value={shipping.email} onChange={(e) => onChange('email', e.target.value)} placeholder="john@example.com" /></div>
+      <div><label className={label}>{t('phoneNumber')}</label><input type="tel" className={input} value={shipping.phone} onChange={(e) => onChange('phone', e.target.value)} placeholder="+1 234 567 8900" /></div>
+      <div><label className={label}>{t('streetAddress')} *</label><input className={input} value={shipping.address} onChange={(e) => onChange('address', e.target.value)} placeholder="123 Main Street" /></div>
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className={labelClass}>City *</label>
-          <input
-            className={inputClass}
-            value={shipping.city}
-            onChange={(e) => onChange('city', e.target.value)}
-            placeholder="New York"
-          />
-        </div>
-        <div>
-          <label className={labelClass}>Postal Code *</label>
-          <input
-            className={inputClass}
-            value={shipping.postalCode}
-            onChange={(e) => onChange('postalCode', e.target.value)}
-            placeholder="10001"
-          />
-        </div>
+        <div><label className={label}>{t('city')} *</label><input className={input} value={shipping.city} onChange={(e) => onChange('city', e.target.value)} placeholder="New York" /></div>
+        <div><label className={label}>{t('postalCode')} *</label><input className={input} value={shipping.postalCode} onChange={(e) => onChange('postalCode', e.target.value)} placeholder="10001" /></div>
       </div>
-
       <div>
-        <label className={labelClass}>Country *</label>
-        <select
-          className={inputClass}
-          value={shipping.country}
-          onChange={(e) => onChange('country', e.target.value)}
-        >
-          <option value="">Select country...</option>
-          {COUNTRIES.map((c) => (
-            <option key={c.code} value={c.code}>{c.name}</option>
-          ))}
+        <label className={label}>{t('country')} *</label>
+        <select className={input} value={shipping.country} onChange={(e) => onChange('country', e.target.value)}>
+          <option value="">{t('selectCountry')}</option>
+          {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
         </select>
       </div>
-
-      {/* State/region — select for countries with known states, text input otherwise */}
       {shipping.country && (
         <div>
-          <label className={labelClass}>State / Region</label>
-          {states.length > 0 ? (
-            <select
-              className={inputClass}
-              value={shipping.state}
-              onChange={(e) => onChange('state', e.target.value)}
-            >
-              <option value="">Select state...</option>
-              {states.map((s) => (
-                <option key={s.code} value={s.name}>{s.name}</option>
-              ))}
-            </select>
-          ) : (
-            <input
-              className={inputClass}
-              value={shipping.state}
-              onChange={(e) => onChange('state', e.target.value)}
-              placeholder="Region / Province"
-            />
-          )}
+          <label className={label}>{t('stateRegion')}</label>
+          {states.length > 0
+            ? <select className={input} value={shipping.state} onChange={(e) => onChange('state', e.target.value)}><option value="">{t('selectState')}</option>{states.map((s) => <option key={s.code} value={s.name}>{s.name}</option>)}</select>
+            : <input className={input} value={shipping.state} onChange={(e) => onChange('state', e.target.value)} placeholder={t('stateRegion')} />
+          }
         </div>
       )}
-
       <div>
-        <label className={labelClass}>Order Notes</label>
-        <textarea
-          className={`${inputClass} resize-none`}
-          rows={3}
-          value={shipping.notes}
-          onChange={(e) => onChange('notes', e.target.value)}
-          placeholder="Special delivery instructions, allergies, etc."
-        />
+        <label className={label}>{t('orderNotes')}</label>
+        <textarea className={`${input} resize-none`} rows={3} value={shipping.notes} onChange={(e) => onChange('notes', e.target.value)} placeholder={t('deliveryInstructions')} />
       </div>
-
       {error && (
-        <p className="text-red-500 text-sm text-center">{error}</p>
+        <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>
       )}
     </div>
   )
 }
 
-function OrderSuccess() {
+/* ── Success screen ── */
+function OrderSuccess({ t, onClose }: { t: (key: string) => string; onClose: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full py-20 text-center px-6">
-      <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center pb-6">
-        <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
+    <div className="flex flex-col items-center justify-center min-h-full py-16 text-center px-8">
+      <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-5 text-green-500">
+        <CheckIcon />
       </div>
-      <h3 className="text-xl font-semibold text-gray-900 pb-2">Order Received!</h3>
-      <p className="text-gray-500 text-sm leading-relaxed">
-        Thank you for your order. We&apos;ve sent a confirmation to your email and will be in touch shortly.
-      </p>
+      <h3 className="text-base font-semibold text-gray-900 mb-2">{t('orderReceived')}</h3>
+      <p className="text-sm text-gray-500 leading-relaxed mb-8">{t('orderThankYou')}</p>
+      <button
+        onClick={onClose}
+        className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium transition-colors"
+      >
+        {t('continueShopping')}
+      </button>
     </div>
   )
 }
