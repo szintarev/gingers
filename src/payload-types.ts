@@ -218,6 +218,7 @@ export interface Page {
     | SingleProductBlock
     | ProductsGridBlock
     | PromiseBlock
+    | TrustStatsBlock
   )[];
   meta?: {
     title?: string | null;
@@ -724,6 +725,29 @@ export interface PromiseBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TrustStatsBlock".
+ */
+export interface TrustStatsBlock {
+  label?: string | null;
+  title: string;
+  description?: string | null;
+  image?: (number | null) | Media;
+  quoteText?: string | null;
+  quotePersonName?: string | null;
+  quotePersonTitle?: string | null;
+  stats?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'trustStats';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1043,6 +1067,7 @@ export interface PagesSelect<T extends boolean = true> {
         singleProduct?: T | SingleProductBlockSelect<T>;
         productsGrid?: T | ProductsGridBlockSelect<T>;
         promise?: T | PromiseBlockSelect<T>;
+        trustStats?: T | TrustStatsBlockSelect<T>;
       };
   meta?:
     | T
@@ -1339,6 +1364,28 @@ export interface PromiseBlockSelect<T extends boolean = true> {
   label?: T;
   title?: T;
   description?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TrustStatsBlock_select".
+ */
+export interface TrustStatsBlockSelect<T extends boolean = true> {
+  label?: T;
+  title?: T;
+  description?: T;
+  image?: T;
+  quoteText?: T;
+  quotePersonName?: T;
+  quotePersonTitle?: T;
+  stats?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
