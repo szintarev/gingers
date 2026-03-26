@@ -42,7 +42,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-            className="fixed inset-0 z-[60] bg-white flex flex-col lg:hidden"
+            className="fixed inset-0 z-[10000] bg-white flex flex-col lg:hidden"
           >
             {/* Top bar */}
             <div className="flex items-center justify-between px-6 h-20 border-b border-gray-100 flex-shrink-0">
@@ -137,7 +137,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
       </AnimatePresence>
 
       <header
-        style={{ position: 'fixed', top: 'var(--admin-bar-height, 0px)', left: 0, right: 0, zIndex: 50 }}
+        style={{ position: 'fixed', top: 'var(--admin-bar-height, 0px)', left: 0, right: 0, zIndex: 9999 }}
         className={`transition-all duration-300 ${headerBg}`}
       >
         <div className="container mx-auto">
