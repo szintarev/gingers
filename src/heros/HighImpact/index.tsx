@@ -24,7 +24,7 @@ export const HighImpactHero: React.FC<Page['hero']> = ({
   const heroDesc = description || 'Experience the pure, natural taste of our handcrafted ginger products'
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden" data-theme="dark">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#6B0F2B]" data-theme="dark">
       <div className="absolute inset-0 z-0 bg-gray-900">
         {media && typeof media === 'object' && media !== null && (
           <Media
@@ -128,7 +128,7 @@ export const HighImpactHero: React.FC<Page['hero']> = ({
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 z-10 w-full overflow-hidden leading-0">
+      <div className="absolute bottom-0 left-0 right-0 z-10 w-full leading-0">
         <svg
           viewBox="0 0 1440 120"
           fill="none"

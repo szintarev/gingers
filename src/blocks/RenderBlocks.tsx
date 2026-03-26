@@ -54,8 +54,15 @@ export const RenderBlocks: React.FC<{
               if (blockType === 'cart') {
                 return <Block key={index} {...(block as any)} disableInnerContainer />
               }
+              if (blockType === 'farmSteps') {
+                return (
+                  <div key={index} style={{ marginTop: '-1px', position: 'relative', zIndex: 1000 }}>
+                    <Block {...(block as any)} disableInnerContainer />
+                  </div>
+                )
+              }
               return (
-                <div key={index}>
+                <div key={index} className="border-0">
                   <Block {...(block as any)} disableInnerContainer />
                 </div>
               )

@@ -207,7 +207,7 @@
 
 @layer base {
   * {
-    @apply outline-ring/50;
+    box-sizing: border-box;
   }
   body {
     @apply bg-background text-foreground min-h-[100vh] flex flex-col;
