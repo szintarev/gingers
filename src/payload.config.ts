@@ -80,7 +80,7 @@ export default buildConfig({
     },
   }),
   collections: [Pages, Media, Users, Products, Orders],
-  cors: [getServerSideURL()].filter(Boolean),
+  cors: [getServerSideURL(), 'http://localhost:3000'].filter(Boolean),
   plugins: [
     ...plugins,
     s3Storage({
