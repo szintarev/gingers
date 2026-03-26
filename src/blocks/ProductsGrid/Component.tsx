@@ -66,17 +66,6 @@ export const ProductsGridBlockComponent: React.FC<ProductsGridBlockProps & { loc
           </div>
         )}
 
-        {buttonText && (
-          <div className="flex justify-center mt-12">
-            <Link
-              href={buttonLink || '/products'}
-              className="inline-flex items-center gap-2 bg-[#8B1538] hover:bg-[#A91D3A] text-white px-8 py-4 rounded-full text-base font-medium transition-all duration-300 group"
-            >
-              {buttonText}
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        )}
       </div>
     </section>
   )

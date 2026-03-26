@@ -20,7 +20,7 @@ export const AboutBlock: React.FC<AboutBlockProps> = ({
   link,
 }) => {
   return (
-    <section id="about" className="pt-24 pb-10 relative overflow-hidden bg-white -mt-1">
+    <section id="about" className="pt-24 pb-24 relative overflow-hidden bg-white -mt-1">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
           <div className="relative">

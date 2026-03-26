@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useTransition, useRef } from 'react'
+import React, { useState, useTransition, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { ShoppingBag, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useCart, type ShippingInfo } from '@/contexts/CartContext'
@@ -116,7 +117,11 @@ export function CartDrawer() {
     shipping.firstName && shipping.lastName && shipping.email &&
     shipping.address && shipping.city && shipping.postalCode && shipping.country
 
-  return (
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  if (!mounted) return null
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
@@ -127,7 +132,7 @@ export function CartDrawer() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/40 z-[55] backdrop-blur-sm"
+            className="fixed inset-0 bg-black/40 z-[10000] backdrop-blur-sm"
           />
 
           {/* Drawer */}
@@ -136,7 +141,7 @@ export function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white z-[55] flex flex-col shadow-2xl"
+            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white z-[10000] flex flex-col shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 h-14 border-b border-gray-100 flex-shrink-0">
@@ -244,7 +249,8 @@ export function CartDrawer() {
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }
 
