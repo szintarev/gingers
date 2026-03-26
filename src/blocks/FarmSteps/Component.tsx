@@ -48,7 +48,7 @@ export const FarmStepsBlock: React.FC<FarmStepsBlockProps> = ({ label, title, de
             </span>
             <div className="h-px w-16 bg-white/40" />
           </div>
-          <h2 className="text-4xl md:text-5xl text-white font-bold pb-5 leading-tight">
+          <h2 className="text-4xl md:text-5xl text-white font-bold pb-5 leading-tight" style={{ marginTop: '-12px' }}>
             {title}
           </h2>
           {description && (
