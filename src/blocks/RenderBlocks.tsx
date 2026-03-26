@@ -60,9 +60,23 @@ export const RenderBlocks: React.FC<{
               }
               if (blockType === 'trustStats') {
                 return (
-                  <div key={index} className="border-0">
-                    <Block {...(block as any)} disableInnerContainer />
-                  </div>
+                  <Fragment key={index}>
+                    <div className="border-0">
+                      <Block {...(block as any)} disableInnerContainer />
+                    </div>
+                  </Fragment>
+                )
+              }
+              if (blockType === 'about') {
+                return (
+                  <Fragment key={index}>
+                    <div style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
+                      <div style={{ height: '1px', backgroundColor: '#8B1538', maxWidth: '80rem', marginLeft: 'auto', marginRight: 'auto' }} />
+                    </div>
+                    <div className="border-0">
+                      <Block {...(block as any)} disableInnerContainer />
+                    </div>
+                  </Fragment>
                 )
               }
               if (blockType === 'farmSteps') {
