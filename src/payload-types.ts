@@ -413,15 +413,30 @@ export interface CallToActionBlock {
  * via the `definition` "ProcessBlock".
  */
 export interface ProcessBlock {
-  processLabel: string;
+  /**
+   * Small label shown above the title (e.g. "OUR PROCESS")
+   */
+  processLabel?: string | null;
   title: string;
-  description: string;
+  /**
+   * Short paragraph shown below the title.
+   */
+  description?: string | null;
+  /**
+   * Optional background image. Displayed at low opacity behind the content.
+   */
   backgroundImage?: (number | null) | Media;
+  /**
+   * Add up to 4 process steps. Each step shows an icon, title and short description.
+   */
   steps: {
+    icon: 'Sprout' | 'FlaskConical' | 'Package' | 'Star';
+    /**
+     * e.g. 01, 02, 03...
+     */
+    stepNumber?: string | null;
     title: string;
     description: string;
-    stepNumber: string;
-    icon: 'Sprout' | 'FlaskConical' | 'Package' | 'Star';
     id?: string | null;
   }[];
   id?: string | null;
@@ -1119,10 +1134,10 @@ export interface ProcessBlockSelect<T extends boolean = true> {
   steps?:
     | T
     | {
+        icon?: T;
+        stepNumber?: T;
         title?: T;
         description?: T;
-        stepNumber?: T;
-        icon?: T;
         id?: T;
       };
   id?: T;
