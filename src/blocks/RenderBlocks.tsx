@@ -16,6 +16,7 @@ import { ProductsBlockComponent } from '@/blocks/Products/Component'
 import { CartBlockComponent } from '@/blocks/Cart/Component'
 import { SingleProductBlockComponent } from '@/blocks/SingleProduct/Component'
 import { ProductsGridBlockComponent } from '@/blocks/ProductsGrid/Component'
+import { PromiseBlockComponent } from '@/blocks/Promise/Component'
 
 const blockComponents = {
   cta: CallToActionBlock,
@@ -32,6 +33,7 @@ const blockComponents = {
   cart: CartBlockComponent,
   singleProduct: SingleProductBlockComponent,
   productsGrid: ProductsGridBlockComponent,
+  promise: PromiseBlockComponent,
 }
 
 export const RenderBlocks: React.FC<{

@@ -217,6 +217,7 @@ export interface Page {
     | CartBlock
     | SingleProductBlock
     | ProductsGridBlock
+    | PromiseBlock
   )[];
   meta?: {
     title?: string | null;
@@ -703,9 +704,23 @@ export interface ProductsGridBlock {
   label: string;
   title: string;
   description?: string | null;
+  buttonText?: string | null;
+  buttonLink?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'productsGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PromiseBlock".
+ */
+export interface PromiseBlock {
+  label?: string | null;
+  title: string;
+  description?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'promise';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1027,6 +1042,7 @@ export interface PagesSelect<T extends boolean = true> {
         cart?: T | CartBlockSelect<T>;
         singleProduct?: T | SingleProductBlockSelect<T>;
         productsGrid?: T | ProductsGridBlockSelect<T>;
+        promise?: T | PromiseBlockSelect<T>;
       };
   meta?:
     | T
@@ -1307,6 +1323,19 @@ export interface SingleProductBlockSelect<T extends boolean = true> {
  * via the `definition` "ProductsGridBlock_select".
  */
 export interface ProductsGridBlockSelect<T extends boolean = true> {
+  label?: T;
+  title?: T;
+  description?: T;
+  buttonText?: T;
+  buttonLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PromiseBlock_select".
+ */
+export interface PromiseBlockSelect<T extends boolean = true> {
   label?: T;
   title?: T;
   description?: T;

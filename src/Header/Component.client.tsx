@@ -20,6 +20,8 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   const { t } = useLanguage()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const { scrollY } = useScroll()
   useMotionValueEvent(scrollY, 'change', (y) => setIsScrolled(y > 50))
@@ -91,6 +93,49 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {isSearchOpen && (
+          <motion.div
+            key="search-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[2000] flex items-start justify-center pt-32 px-4"
+            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+            onClick={() => { setIsSearchOpen(false); setSearchQuery('') }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+              className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+                <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <input
+                  autoFocus
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Escape' && (setIsSearchOpen(false), setSearchQuery(''))}
+                  placeholder="Search products..."
+                  className="flex-1 text-gray-800 text-base outline-none placeholder:text-gray-400"
+                />
+                <button
+                  onClick={() => { setIsSearchOpen(false); setSearchQuery('') }}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <header
         style={{ position: 'fixed', top: 'var(--admin-bar-height, 0px)', left: 0, right: 0, zIndex: 50 }}
         className={`transition-all duration-300 ${headerBg}`}
@@ -122,6 +167,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => setIsSearchOpen(true)}
                 className={`hidden md:flex items-center justify-center w-9 h-9 rounded-md transition-colors ${interactiveItemClass}`}
                 aria-label="Search"
               >

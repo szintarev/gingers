@@ -24,6 +24,19 @@ export const ProductsGridBlock: Block = {
       localized: true,
       required: false,
     },
+    {
+      name: 'buttonText',
+      type: 'text',
+      localized: true,
+      required: false,
+      defaultValue: 'View All Products',
+    },
+    {
+      name: 'buttonLink',
+      type: 'text',
+      required: false,
+      defaultValue: '/products',
+    },
   ],
   labels: {
     plural: 'Products Grid Blocks',
