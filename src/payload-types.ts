@@ -737,8 +737,8 @@ export interface TrustStatsBlock {
   quotePersonTitle?: string | null;
   stats?:
     | {
-        value: string;
-        label: string;
+        value?: string | null;
+        label?: string | null;
         id?: string | null;
       }[]
     | null;

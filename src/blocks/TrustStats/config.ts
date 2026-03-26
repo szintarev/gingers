@@ -50,20 +50,16 @@ export const TrustStatsBlock: Block = {
     {
       name: 'stats',
       type: 'array',
-      minRows: 1,
-      maxRows: 4,
       fields: [
         {
           name: 'value',
           type: 'text',
           localized: true,
-          required: true,
         },
         {
           name: 'label',
           type: 'text',
           localized: true,
-          required: true,
         },
       ],
     },

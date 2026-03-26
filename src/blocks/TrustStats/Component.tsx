@@ -15,9 +15,9 @@ export const TrustStatsBlockComponent: React.FC<TrustStatsBlockProps> = ({
   const initial = quotePersonName?.[0]?.toUpperCase() ?? 'N'
 
   return (
-    <section className="py-20 bg-white">
+    <section className="pt-10 pb-20 bg-white">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
 
           {/* Left — image + quote card */}
           <div className="relative">
