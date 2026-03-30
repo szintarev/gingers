@@ -1,6 +1,11 @@
 import type { CollectionConfig } from 'payload'
 import { authenticated } from '../../access/authenticated'
 
+/*==================================================================
+    ORDERS COLLECTION
+    Stores customer orders. Created publicly via /api/order route.
+    Read/update/delete restricted to authenticated admins.
+==================================================================*/
 export const Orders: CollectionConfig = {
   slug: 'orders',
   access: {
@@ -47,28 +52,19 @@ export const Orders: CollectionConfig = {
       type: 'collapsible',
       label: 'Customer',
       fields: [
-        {
-          type: 'row',
-          fields: [
-            { name: 'customerName', type: 'text', required: true, admin: { readOnly: true, width: '50%' } },
-            { name: 'customerEmail', type: 'email', required: true, admin: { readOnly: true, width: '50%' } },
-          ],
-        },
-        {
-          type: 'row',
-          fields: [
-            { name: 'customerPhone', type: 'text', admin: { readOnly: true, width: '50%' } },
-            { name: 'customerCountry', type: 'text', admin: { readOnly: true, width: '50%' } },
-          ],
-        },
-        {
-          type: 'row',
-          fields: [
-            { name: 'customerCity', type: 'text', admin: { readOnly: true, width: '33%' } },
-            { name: 'customerState', type: 'text', admin: { readOnly: true, width: '33%' } },
-            { name: 'customerPostal', type: 'text', admin: { readOnly: true, width: '33%' } },
-          ],
-        },
+        { type: 'row', fields: [
+          { name: 'customerName', type: 'text', required: true, admin: { readOnly: true, width: '50%' } },
+          { name: 'customerEmail', type: 'email', required: true, admin: { readOnly: true, width: '50%' } },
+        ]},
+        { type: 'row', fields: [
+          { name: 'customerPhone', type: 'text', admin: { readOnly: true, width: '50%' } },
+          { name: 'customerCountry', type: 'text', admin: { readOnly: true, width: '50%' } },
+        ]},
+        { type: 'row', fields: [
+          { name: 'customerCity', type: 'text', admin: { readOnly: true, width: '33%' } },
+          { name: 'customerState', type: 'text', admin: { readOnly: true, width: '33%' } },
+          { name: 'customerPostal', type: 'text', admin: { readOnly: true, width: '33%' } },
+        ]},
         { name: 'customerAddress', type: 'text', admin: { readOnly: true } },
         { name: 'customerNotes', type: 'textarea', admin: { readOnly: true } },
       ],

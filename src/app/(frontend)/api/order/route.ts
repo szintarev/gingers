@@ -3,12 +3,21 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { CartItem, ShippingInfo } from '@/contexts/CartContext'
 
+/*==================================================================
+    GENERATE ORDER NUMBER
+    Format: ORD-<base36 timestamp>-<random 4 chars>
+==================================================================*/
 function generateOrderNumber(): string {
   const ts = Date.now().toString(36).toUpperCase()
   const rand = Math.random().toString(36).substring(2, 6).toUpperCase()
   return `ORD-${ts}-${rand}`
 }
 
+/*==================================================================
+    POST /api/order
+    Creates a new order in Payload. Supports idempotency key to
+    prevent duplicate orders on network retry.
+==================================================================*/
 export async function POST(req: NextRequest) {
   try {
     const { cart, shipping, idempotencyKey } = (await req.json()) as {
@@ -23,6 +32,7 @@ export async function POST(req: NextRequest) {
 
     const payload = await getPayload({ config })
 
+    // Return existing order if this key was already processed
     if (idempotencyKey) {
       const existing = await payload.find({
         collection: 'orders',

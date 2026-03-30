@@ -1,27 +1,28 @@
 import type { Block, CollectionAfterChangeHook, Field, Tab } from 'payload'
 
+/*==================================================================
+    CONSTANTS
+==================================================================*/
 const TARGET_LOCALES = ['sr', 'hu', 'ru']
 
+/*==================================================================
+    COLLECT BLOCK DEFINITIONS FROM FIELD SCHEMA
+==================================================================*/
 function collectBlockDefs(fields: Field[]): Block[] {
   const blocks: Block[] = []
   for (const field of fields) {
-    if (field.type === 'blocks') {
-      blocks.push(...field.blocks)
-    } else if (field.type === 'tabs') {
-      for (const tab of field.tabs) {
-        blocks.push(...collectBlockDefs(tab.fields))
-      }
-    } else if (field.type === 'group') {
-      blocks.push(...collectBlockDefs(field.fields))
-    } else if (field.type === 'array') {
-      blocks.push(...collectBlockDefs(field.fields))
-    }
+    if (field.type === 'blocks') blocks.push(...field.blocks)
+    else if (field.type === 'tabs') for (const tab of field.tabs) blocks.push(...collectBlockDefs(tab.fields))
+    else if (field.type === 'group') blocks.push(...collectBlockDefs(field.fields))
+    else if (field.type === 'array') blocks.push(...collectBlockDefs(field.fields))
   }
   return blocks
 }
 
-// Copies localized text/textarea fields from source into result,
-// skipping any field that already has a value in `existing`.
+/*==================================================================
+    COPY LOCALIZED FIELDS FROM SOURCE TO TARGET LOCALE
+    Skips any field that already has a value in the existing locale doc.
+==================================================================*/
 function copyLocalizedFields(
   source: Record<string, any>,
   fields: Field[],
@@ -34,20 +35,10 @@ function copyLocalizedFields(
     if (field.type === 'tabs') {
       for (const tab of field.tabs) {
         if ('name' in tab && tab.name) {
-          const tabResult = copyLocalizedFields(
-            source[tab.name] ?? {},
-            tab.fields,
-            existing[tab.name] ?? {},
-            blockDefs,
-          )
-          if (Object.keys(tabResult).length > 0) {
-            result[tab.name] = { ...(existing[tab.name] ?? {}), ...tabResult }
-          }
+          const tabResult = copyLocalizedFields(source[tab.name] ?? {}, tab.fields, existing[tab.name] ?? {}, blockDefs)
+          if (Object.keys(tabResult).length > 0) result[tab.name] = { ...(existing[tab.name] ?? {}), ...tabResult }
         } else {
-          Object.assign(
-            result,
-            copyLocalizedFields(source, (tab as Tab).fields, existing, blockDefs),
-          )
+          Object.assign(result, copyLocalizedFields(source, (tab as Tab).fields, existing, blockDefs))
         }
       }
       continue
@@ -59,29 +50,19 @@ function copyLocalizedFields(
     const exVal = existing[key]
 
     if ((field.type === 'text' || field.type === 'textarea') && field.localized) {
-      if (srcVal && !exVal) {
-        result[key] = srcVal
-      }
+      if (srcVal && !exVal) result[key] = srcVal
     } else if (field.type === 'richText') {
-      // Skip — Lexical JSON structure is locale-independent in most cases
+      // Skip — Lexical JSON is locale-independent
     } else if (field.type === 'group' && srcVal && typeof srcVal === 'object') {
       const groupResult = copyLocalizedFields(srcVal, field.fields, exVal ?? {}, blockDefs)
-      if (Object.keys(groupResult).length > 0) {
-        result[key] = { ...(exVal ?? {}), ...groupResult }
-      }
+      if (Object.keys(groupResult).length > 0) result[key] = { ...(exVal ?? {}), ...groupResult }
     } else if (field.type === 'array' && Array.isArray(srcVal)) {
-      const arrResults = srcVal.map((item, i) =>
-        copyLocalizedFields(item, field.fields, exVal?.[i] ?? {}, blockDefs),
-      )
+      const arrResults = srcVal.map((item, i) => copyLocalizedFields(item, field.fields, exVal?.[i] ?? {}, blockDefs))
       if (arrResults.some((r) => Object.keys(r).length > 0)) {
         result[key] = srcVal.map((item, i) => {
           const existingItem = exVal?.[i]
-          // Use existing locale item as base to preserve its IDs — prevents Payload
-          // from treating items as new rows and duplicating them.
-          // For brand-new items (no existing locale counterpart), fall back to source.
-          return existingItem
-            ? { ...existingItem, ...arrResults[i] }
-            : { ...item, ...arrResults[i] }
+          // Use existing locale item as base to preserve IDs and prevent duplicate rows
+          return existingItem ? { ...existingItem, ...arrResults[i] } : { ...item, ...arrResults[i] }
         })
       }
     } else if (field.type === 'blocks' && Array.isArray(srcVal)) {
@@ -93,9 +74,7 @@ function copyLocalizedFields(
       if (blockResults.some((r) => Object.keys(r).length > 0)) {
         result[key] = srcVal.map((item, i) => {
           const existingItem = exVal?.[i]
-          return existingItem
-            ? { ...existingItem, ...blockResults[i] }
-            : { ...item, ...blockResults[i] }
+          return existingItem ? { ...existingItem, ...blockResults[i] } : { ...item, ...blockResults[i] }
         })
       }
     }
@@ -104,13 +83,16 @@ function copyLocalizedFields(
   return result
 }
 
+/*==================================================================
+    AUTO TRANSLATE HOOK
+    Fires after every English save and copies localized fields to
+    SR / HU / RU — fire-and-forget, does not block the save response.
+==================================================================*/
 export const autoTranslateHook: CollectionAfterChangeHook = async ({ doc, req, collection }) => {
-  // Only trigger when saving the default (English) locale
   if (req.locale && req.locale !== 'en') return doc
 
   const blockDefs = collectBlockDefs(collection.fields)
 
-  // Fire and forget — doesn't block the save response
   ;(async () => {
     for (const locale of TARGET_LOCALES) {
       try {
@@ -132,7 +114,7 @@ export const autoTranslateHook: CollectionAfterChangeHook = async ({ doc, req, c
           overrideAccess: true,
         })
       } catch (err) {
-        req.payload.logger.error(`[copyLocales] ${locale} failed: ${err}`)
+        req.payload.logger.error(`[autoTranslate] ${locale} failed: ${err}`)
       }
     }
   })()

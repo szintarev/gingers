@@ -1,7 +1,9 @@
 import React, { Fragment } from 'react'
-
 import type { Page } from '@/payload-types'
 
+/*==================================================================
+    BLOCK IMPORTS
+==================================================================*/
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ProcessBlock } from '@/blocks/Process/Component'
 import { FarmStepsBlock } from '@/blocks/FarmSteps/Component'
@@ -19,6 +21,9 @@ import { ProductsGridBlockComponent } from '@/blocks/ProductsGrid/Component'
 import { PromiseBlockComponent } from '@/blocks/Promise/Component'
 import { TrustStatsBlockComponent } from '@/blocks/TrustStats/Component'
 
+/*==================================================================
+    BLOCK MAP — slug → component
+==================================================================*/
 const blockComponents = {
   cta: CallToActionBlock,
   process: ProcessBlock,
@@ -38,66 +43,55 @@ const blockComponents = {
   trustStats: TrustStatsBlockComponent,
 }
 
-export const RenderBlocks: React.FC<{
-  blocks: Page['layout'][0][]
-}> = (props) => {
-  const { blocks } = props
+/*==================================================================
+    RENDER BLOCKS
+    Maps the page layout array to block components in order.
+    Some blocks have layout-specific wrappers (dividers, offsets).
+==================================================================*/
+export const RenderBlocks: React.FC<{ blocks: Page['layout'][0][] }> = ({ blocks }) => {
+  if (!blocks?.length) return null
 
-  const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
+  return (
+    <Fragment>
+      {blocks.map((block, index) => {
+        const { blockType } = block
+        if (!blockType || !(blockType in blockComponents)) return null
 
-  if (hasBlocks) {
-    return (
-      <Fragment>
-        {blocks.map((block, index) => {
-          const { blockType } = block
+        const Block = blockComponents[blockType as keyof typeof blockComponents]
+        if (!Block) return null
 
-          if (blockType && blockType in blockComponents) {
-            const Block = blockComponents[blockType as keyof typeof blockComponents]
+        // Full-bleed cart page — no wrapper
+        if (blockType === 'cart') {
+          return <Block key={index} {...(block as any)} disableInnerContainer />
+        }
 
-            if (Block) {
-              if (blockType === 'cart') {
-                return <Block key={index} {...(block as any)} disableInnerContainer />
-              }
-              if (blockType === 'trustStats') {
-                return (
-                  <Fragment key={index}>
-                    <div className="border-0">
-                      <Block {...(block as any)} disableInnerContainer />
-                    </div>
-                  </Fragment>
-                )
-              }
-              if (blockType === 'about') {
-                return (
-                  <Fragment key={index}>
-                    <div style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
-                      <div style={{ height: '1px', backgroundColor: '#8B1538', maxWidth: '80rem', marginLeft: 'auto', marginRight: 'auto' }} />
-                    </div>
-                    <div className="border-0">
-                      <Block {...(block as any)} disableInnerContainer />
-                    </div>
-                  </Fragment>
-                )
-              }
-              if (blockType === 'farmSteps') {
-                return (
-                  <div key={index} style={{ marginTop: '-1px' }}>
-                    <Block {...(block as any)} disableInnerContainer />
-                  </div>
-                )
-              }
-              return (
-                <div key={index} className="border-0">
-                  <Block {...(block as any)} disableInnerContainer />
-                </div>
-              )
-            }
-          }
-          return null
-        })}
-      </Fragment>
-    )
-  }
+        // About block gets a top divider line in brand color
+        if (blockType === 'about') {
+          return (
+            <div key={index}>
+              <div style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
+                <div style={{ height: '1px', backgroundColor: '#8B1538', maxWidth: '80rem', marginLeft: 'auto', marginRight: 'auto' }} />
+              </div>
+              <Block {...(block as any)} disableInnerContainer />
+            </div>
+          )
+        }
 
-  return null
+        // FarmSteps overlaps with section above by 1px to avoid rendering gap
+        if (blockType === 'farmSteps') {
+          return (
+            <div key={index} style={{ marginTop: '-1px' }}>
+              <Block {...(block as any)} disableInnerContainer />
+            </div>
+          )
+        }
+
+        return (
+          <div key={index}>
+            <Block {...(block as any)} disableInnerContainer />
+          </div>
+        )
+      })}
+    </Fragment>
+  )
 }

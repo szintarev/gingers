@@ -2,6 +2,9 @@
 
 import React, { createContext, use, useState, useEffect, useCallback } from 'react'
 
+/*==================================================================
+    TYPES
+==================================================================*/
 interface SavedItem {
   id: number
   name: string
@@ -18,11 +21,18 @@ interface SavedItemsContextValue {
   isSaved: (id: number) => boolean
 }
 
+/*==================================================================
+    CONTEXT
+==================================================================*/
 const SavedItemsContext = createContext<SavedItemsContextValue | null>(null)
 
+/*==================================================================
+    PROVIDER
+==================================================================*/
 export function SavedItemsProvider({ children }: { children: React.ReactNode }) {
   const [savedItems, setSavedItems] = useState<SavedItem[]>([])
 
+  // Hydrate from localStorage on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem('gingers_saved')
@@ -30,26 +40,20 @@ export function SavedItemsProvider({ children }: { children: React.ReactNode }) 
     } catch {}
   }, [])
 
+  // Persist to localStorage on every change
   useEffect(() => {
-    try {
-      localStorage.setItem('gingers_saved', JSON.stringify(savedItems))
-    } catch {}
+    try { localStorage.setItem('gingers_saved', JSON.stringify(savedItems)) } catch {}
   }, [savedItems])
 
   const addToSaved = useCallback((item: SavedItem) => {
-    setSavedItems((prev) => {
-      if (prev.find((i) => i.id === item.id)) return prev
-      return [...prev, item]
-    })
+    setSavedItems((prev) => prev.find((i) => i.id === item.id) ? prev : [...prev, item])
   }, [])
 
   const removeFromSaved = useCallback((id: number) => {
     setSavedItems((prev) => prev.filter((i) => i.id !== id))
   }, [])
 
-  const isSaved = useCallback((id: number) => {
-    return savedItems.some((i) => i.id === id)
-  }, [savedItems])
+  const isSaved = useCallback((id: number) => savedItems.some((i) => i.id === id), [savedItems])
 
   return (
     <SavedItemsContext.Provider value={{ savedItems, addToSaved, removeFromSaved, isSaved }}>
@@ -58,6 +62,9 @@ export function SavedItemsProvider({ children }: { children: React.ReactNode }) 
   )
 }
 
+/*==================================================================
+    HOOK
+==================================================================*/
 export function useSavedItems(): SavedItemsContextValue {
   const ctx = use(SavedItemsContext)
   if (!ctx) throw new Error('useSavedItems must be used within SavedItemsProvider')

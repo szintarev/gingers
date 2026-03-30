@@ -9,6 +9,9 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { COUNTRIES } from '@/lib/countries'
 import { sendOrderEmail } from '@/lib/sendOrderEmail'
 
+/*==================================================================
+    CONSTANTS
+==================================================================*/
 const CURRENCY = '€'
 
 const EMPTY_SHIPPING: ShippingInfo = {
@@ -18,12 +21,13 @@ const EMPTY_SHIPPING: ShippingInfo = {
 
 type CheckoutStep = 'cart' | 'shipping' | 'success'
 
-/* ── Inline SVGs ── */
+/*==================================================================
+    INLINE SVG ICONS
+==================================================================*/
 function CloseIcon({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
+      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   )
 }
@@ -39,8 +43,7 @@ function MinusIcon() {
 function PlusIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
+      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
     </svg>
   )
 }
@@ -64,7 +67,11 @@ function CheckIcon() {
   )
 }
 
-/* ── Main drawer ── */
+/*==================================================================
+    CART DRAWER
+    Rendered via createPortal into document.body so it sits above
+    the fixed header (which has its own stacking context).
+==================================================================*/
 export function CartDrawer() {
   const { cart, isOpen, closeCart, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCart()
   const { t } = useLanguage()
@@ -76,6 +83,10 @@ export function CartDrawer() {
 
   const selectedCountry = COUNTRIES.find((c) => c.code === shipping.country)
   const states = selectedCountry?.states ?? []
+
+  // Prevent portal render on server
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   function handleShippingChange(field: keyof ShippingInfo, value: string) {
     setShipping((prev) =>
@@ -106,19 +117,13 @@ export function CartDrawer() {
 
   function handleClose() {
     closeCart()
-    setTimeout(() => {
-      setStep('cart')
-      setShipping(EMPTY_SHIPPING)
-      setError('')
-    }, 300)
+    setTimeout(() => { setStep('cart'); setShipping(EMPTY_SHIPPING); setError('') }, 300)
   }
 
   const isShippingValid =
     shipping.firstName && shipping.lastName && shipping.email &&
     shipping.address && shipping.city && shipping.postalCode && shipping.country
 
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
   if (!mounted) return null
 
   return createPortal(
@@ -127,9 +132,7 @@ export function CartDrawer() {
         <>
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={handleClose}
             className="fixed inset-0 bg-black/40 z-[10000] backdrop-blur-sm"
@@ -137,9 +140,7 @@ export function CartDrawer() {
 
           {/* Drawer */}
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white z-[10000] flex flex-col shadow-2xl"
           >
@@ -147,11 +148,7 @@ export function CartDrawer() {
             <div className="flex items-center justify-between px-6 h-14 border-b border-gray-100 flex-shrink-0">
               <div className="flex items-center gap-2">
                 {step === 'shipping' && (
-                  <button
-                    onClick={() => setStep('cart')}
-                    className="text-gray-400 hover:text-gray-700 transition-colors -ml-1 p-1"
-                    aria-label={t('back')}
-                  >
+                  <button onClick={() => setStep('cart')} className="text-gray-400 hover:text-gray-700 transition-colors -ml-1 p-1" aria-label={t('back')}>
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                 )}
@@ -162,11 +159,7 @@ export function CartDrawer() {
                   {step === 'success' && t('orderReceived')}
                 </h2>
               </div>
-              <button
-                onClick={handleClose}
-                className="text-gray-500 hover:text-red-500 transition-colors p-1 -mr-1"
-                aria-label="Close"
-              >
+              <button onClick={handleClose} className="text-gray-500 hover:text-red-500 transition-colors p-1 -mr-1" aria-label="Close">
                 <CloseIcon size={16} />
               </button>
             </div>
@@ -181,39 +174,20 @@ export function CartDrawer() {
                       <div className={`px-6 py-2.5 text-xs font-medium transition-colors ${active ? 'text-gray-900' : 'text-gray-400'}`}>
                         {i + 1}. {s === 'cart' ? t('yourCart') : t('shippingDetails')}
                       </div>
-                      {active && (
-                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#8B1538]" />
-                      )}
+                      {active && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#8B1538]" />}
                     </div>
                   )
                 })}
                 <div className="relative flex-1">
-                  <div className="px-6 py-2.5 text-xs font-medium text-gray-400">
-                    3. {t('orderPlaced')}
-                  </div>
+                  <div className="px-6 py-2.5 text-xs font-medium text-gray-400">3. {t('orderPlaced')}</div>
                 </div>
               </div>
             )}
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto">
-              {step === 'cart' && (
-                <CartStep
-                  removeFromCart={removeFromCart}
-                  updateQuantity={updateQuantity}
-                  clearCart={clearCart}
-                  t={t}
-                />
-              )}
-              {step === 'shipping' && (
-                <ShippingForm
-                  shipping={shipping}
-                  states={states}
-                  onChange={handleShippingChange}
-                  error={error}
-                  t={t}
-                />
-              )}
+              {step === 'cart' && <CartStep removeFromCart={removeFromCart} updateQuantity={updateQuantity} clearCart={clearCart} t={t} />}
+              {step === 'shipping' && <ShippingForm shipping={shipping} states={states} onChange={handleShippingChange} error={error} t={t} />}
               {step === 'success' && <OrderSuccess t={t} onClose={handleClose} />}
             </div>
 
@@ -225,23 +199,13 @@ export function CartDrawer() {
                   <span className="text-lg font-bold text-gray-900 tabular-nums">{CURRENCY}{getTotalPrice().toFixed(2)}</span>
                 </div>
                 {step === 'cart' && (
-                  <button
-                    onClick={() => setStep('shipping')}
-                    className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-colors"
-                  >
+                  <button onClick={() => setStep('shipping')} className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-colors">
                     {t('proceedToCheckout')} <ChevronRight className="w-4 h-4" />
                   </button>
                 )}
                 {step === 'shipping' && (
-                  <button
-                    onClick={handlePlaceOrder}
-                    disabled={!isShippingValid || isPending}
-                    className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {isPending
-                      ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('placingOrder')}</>
-                      : t('placeOrder')
-                    }
+                  <button onClick={handlePlaceOrder} disabled={!isShippingValid || isPending} className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                    {isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('placingOrder')}</> : t('placeOrder')}
                   </button>
                 )}
               </div>
@@ -254,12 +218,11 @@ export function CartDrawer() {
   )
 }
 
-/* ── Cart step ── */
+/*==================================================================
+    CART STEP — ITEM LIST
+==================================================================*/
 function CartStep({
-  removeFromCart,
-  updateQuantity,
-  clearCart,
-  t,
+  removeFromCart, updateQuantity, clearCart, t,
 }: {
   removeFromCart: (id: number) => void
   updateQuantity: (id: number, qty: number) => void
@@ -290,61 +253,38 @@ function CartStep({
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
-                <button
-                  onClick={() => removeFromCart(item.id)}
-                  className="flex-shrink-0 text-gray-500 hover:text-red-500 transition-colors"
-                  aria-label={t('remove')}
-                >
+                <button onClick={() => removeFromCart(item.id)} className="flex-shrink-0 text-gray-500 hover:text-red-500 transition-colors" aria-label={t('remove')}>
                   <RemoveIcon />
                 </button>
               </div>
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    className="w-7 h-7 flex items-center justify-center text-[#8B1538] hover:bg-[#8B1538]/10 transition-colors"
-                  >
+                  <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 flex items-center justify-center text-[#8B1538] hover:bg-[#8B1538]/10 transition-colors">
                     <MinusIcon />
                   </button>
-                  <span className="text-xs font-semibold text-gray-900 w-6 text-center tabular-nums select-none">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="w-7 h-7 flex items-center justify-center text-[#8B1538] hover:bg-[#8B1538]/10 transition-colors"
-                  >
+                  <span className="text-xs font-semibold text-gray-900 w-6 text-center tabular-nums select-none">{item.quantity}</span>
+                  <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-7 h-7 flex items-center justify-center text-[#8B1538] hover:bg-[#8B1538]/10 transition-colors">
                     <PlusIcon />
                   </button>
                 </div>
-                <p className="text-sm font-semibold text-[#8B1538] tabular-nums">
-                  {CURRENCY}{(item.price * item.quantity).toFixed(2)}
-                </p>
+                <p className="text-sm font-semibold text-[#8B1538] tabular-nums">{CURRENCY}{(item.price * item.quantity).toFixed(2)}</p>
               </div>
             </div>
           </li>
         ))}
       </ul>
-
-      {/* Clear cart */}
       <div className="px-6 py-3 border-t border-gray-100">
-        <button
-          onClick={clearCart}
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          {t('clearAllItems')}
-        </button>
+        <button onClick={clearCart} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">{t('clearAllItems')}</button>
       </div>
     </div>
   )
 }
 
-/* ── Shipping form ── */
+/*==================================================================
+    SHIPPING FORM
+==================================================================*/
 function ShippingForm({
-  shipping,
-  states,
-  onChange,
-  error,
-  t,
+  shipping, states, onChange, error, t,
 }: {
   shipping: ShippingInfo
   states: { code: string; name: string }[]
@@ -388,14 +328,14 @@ function ShippingForm({
         <label className={label}>{t('orderNotes')}</label>
         <textarea className={`${input} resize-none`} rows={3} value={shipping.notes} onChange={(e) => onChange('notes', e.target.value)} placeholder={t('deliveryInstructions')} />
       </div>
-      {error && (
-        <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>
-      )}
+      {error && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>}
     </div>
   )
 }
 
-/* ── Success screen ── */
+/*==================================================================
+    ORDER SUCCESS SCREEN
+==================================================================*/
 function OrderSuccess({ t, onClose }: { t: (key: string) => string; onClose: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-full py-16 text-center px-8">
@@ -404,10 +344,7 @@ function OrderSuccess({ t, onClose }: { t: (key: string) => string; onClose: () 
       </div>
       <h3 className="text-base font-semibold text-gray-900 mb-2">{t('orderReceived')}</h3>
       <p className="text-sm text-gray-500 leading-relaxed mb-8">{t('orderThankYou')}</p>
-      <button
-        onClick={onClose}
-        className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium transition-colors"
-      >
+      <button onClick={onClose} className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium transition-colors">
         {t('continueShopping')}
       </button>
     </div>
