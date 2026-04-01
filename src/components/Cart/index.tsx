@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useState, useTransition, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { ShoppingBag, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
+import type { OnApproveData } from '@paypal/react-paypal-js'
 import { useCart, type ShippingInfo } from '@/contexts/CartContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { COUNTRIES } from '@/lib/countries'
@@ -19,7 +21,7 @@ const EMPTY_SHIPPING: ShippingInfo = {
   address: '', city: '', postalCode: '', country: '', state: '', notes: '',
 }
 
-type CheckoutStep = 'cart' | 'shipping' | 'success'
+type CheckoutStep = 'cart' | 'shipping' | 'payment' | 'success'
 
 /*==================================================================
     INLINE SVG ICONS
@@ -77,8 +79,8 @@ export function CartDrawer() {
   const { t } = useLanguage()
   const [step, setStep] = useState<CheckoutStep>('cart')
   const [shipping, setShipping] = useState<ShippingInfo>(EMPTY_SHIPPING)
-  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
   const idempotencyKey = useRef(crypto.randomUUID())
 
   const selectedCountry = COUNTRIES.find((c) => c.code === shipping.country)
@@ -94,30 +96,56 @@ export function CartDrawer() {
     )
   }
 
-  function handlePlaceOrder() {
-    setError('')
-    startTransition(async () => {
-      try {
-        const res = await fetch('/api/order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cart, shipping, idempotencyKey: idempotencyKey.current }),
-        })
-        if (!res.ok) throw new Error()
-        const { orderNumber } = await res.json()
-        await sendOrderEmail(cart, shipping, orderNumber)
-        idempotencyKey.current = crypto.randomUUID()
-        clearCart()
-        setStep('success')
-      } catch {
-        setError(t('somethingWentWrong'))
-      }
+  async function createPayPalOrder(): Promise<string> {
+    const res = await fetch('/api/paypal/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: getTotalPrice().toFixed(2) }),
     })
+    if (!res.ok) throw new Error('Failed to create PayPal order')
+    const { orderID } = await res.json()
+    return orderID
+  }
+
+  async function onPayPalApprove(data: OnApproveData): Promise<void> {
+    setError('')
+    setIsProcessingPayment(true)
+    try {
+      // 1. Capture payment server-side
+      const captureRes = await fetch('/api/paypal/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderID: data.orderID }),
+      })
+      if (!captureRes.ok) throw new Error('capture')
+
+      // 2. Create order in CMS
+      const orderRes = await fetch('/api/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart, shipping, idempotencyKey: idempotencyKey.current }),
+      })
+      if (!orderRes.ok) throw new Error('order')
+
+      const { orderNumber } = await orderRes.json()
+      await sendOrderEmail(cart, shipping, orderNumber)
+      idempotencyKey.current = crypto.randomUUID()
+      clearCart()
+      setStep('success')
+    } catch {
+      setError(t('somethingWentWrong'))
+      setIsProcessingPayment(false)
+    }
   }
 
   function handleClose() {
     closeCart()
-    setTimeout(() => { setStep('cart'); setShipping(EMPTY_SHIPPING); setError('') }, 300)
+    setTimeout(() => { setStep('cart'); setShipping(EMPTY_SHIPPING); setError(''); setIsProcessingPayment(false) }, 300)
+  }
+
+  function handleBack() {
+    if (step === 'shipping') setStep('cart')
+    else if (step === 'payment') setStep('shipping')
   }
 
   const isShippingValid =
@@ -125,6 +153,13 @@ export function CartDrawer() {
     shipping.address && shipping.city && shipping.postalCode && shipping.country
 
   if (!mounted) return null
+
+  const STEPS: CheckoutStep[] = ['cart', 'shipping', 'payment']
+  const stepLabels: Record<string, string> = {
+    cart: t('yourCart'),
+    shipping: t('shippingDetails'),
+    payment: t('payment'),
+  }
 
   return createPortal(
     <AnimatePresence>
@@ -147,8 +182,8 @@ export function CartDrawer() {
             {/* Header */}
             <div className="flex items-center justify-between px-6 h-14 border-b border-gray-100 flex-shrink-0">
               <div className="flex items-center gap-2">
-                {step === 'shipping' && (
-                  <button onClick={() => setStep('cart')} className="text-gray-400 hover:text-gray-700 transition-colors -ml-1 p-1" aria-label={t('back')}>
+                {(step === 'shipping' || step === 'payment') && (
+                  <button onClick={handleBack} className="text-gray-400 hover:text-gray-700 transition-colors -ml-1 p-1" aria-label={t('back')}>
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                 )}
@@ -156,6 +191,7 @@ export function CartDrawer() {
                   {step !== 'success' && <ShoppingBag className="w-4 h-4 text-[#8B1538]" />}
                   {step === 'cart' && t('yourCart')}
                   {step === 'shipping' && t('shippingDetails')}
+                  {step === 'payment' && t('payment')}
                   {step === 'success' && t('orderReceived')}
                 </h2>
               </div>
@@ -167,49 +203,66 @@ export function CartDrawer() {
             {/* Step tabs */}
             {step !== 'success' && (
               <div className="flex border-b border-gray-100 flex-shrink-0">
-                {(['cart', 'shipping'] as const).map((s, i) => {
+                {STEPS.map((s, i) => {
                   const active = step === s
                   return (
                     <div key={s} className="relative flex-1">
-                      <div className={`px-6 py-2.5 text-xs font-medium transition-colors ${active ? 'text-gray-900' : 'text-gray-400'}`}>
-                        {i + 1}. {s === 'cart' ? t('yourCart') : t('shippingDetails')}
+                      <div className={`px-3 py-2.5 text-xs font-medium transition-colors truncate ${active ? 'text-gray-900' : 'text-gray-400'}`}>
+                        {i + 1}. {stepLabels[s]}
                       </div>
                       {active && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#8B1538]" />}
                     </div>
                   )
                 })}
                 <div className="relative flex-1">
-                  <div className="px-6 py-2.5 text-xs font-medium text-gray-400">3. {t('orderPlaced')}</div>
+                  <div className="px-3 py-2.5 text-xs font-medium text-gray-400 truncate">4. {t('orderPlaced')}</div>
                 </div>
               </div>
             )}
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto">
-              {step === 'cart' && <CartStep removeFromCart={removeFromCart} updateQuantity={updateQuantity} clearCart={clearCart} t={t} />}
-              {step === 'shipping' && <ShippingForm shipping={shipping} states={states} onChange={handleShippingChange} error={error} t={t} />}
-              {step === 'success' && <OrderSuccess t={t} onClose={handleClose} />}
-            </div>
-
-            {/* Footer */}
-            {step !== 'success' && cart.length > 0 && (
-              <div className="border-t border-gray-100 px-6 py-5 space-y-4 flex-shrink-0">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">{t('total')}</span>
-                  <span className="text-lg font-bold text-gray-900 tabular-nums">{CURRENCY}{getTotalPrice().toFixed(2)}</span>
-                </div>
-                {step === 'cart' && (
-                  <button onClick={() => setStep('shipping')} className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-colors">
-                    {t('proceedToCheckout')} <ChevronRight className="w-4 h-4" />
-                  </button>
+            <PayPalScriptProvider options={{
+              clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? '',
+              currency: 'EUR',
+              intent: 'capture',
+            }}>
+              <div className="flex-1 overflow-y-auto">
+                {step === 'cart' && <CartStep removeFromCart={removeFromCart} updateQuantity={updateQuantity} clearCart={clearCart} t={t} />}
+                {step === 'shipping' && <ShippingForm shipping={shipping} states={states} onChange={handleShippingChange} error={error} t={t} />}
+                {step === 'payment' && (
+                  <PaymentStep
+                    getTotalPrice={getTotalPrice}
+                    createOrder={createPayPalOrder}
+                    onApprove={onPayPalApprove}
+                    onError={() => setError(t('somethingWentWrong'))}
+                    isProcessing={isProcessingPayment}
+                    error={error}
+                    t={t}
+                  />
                 )}
-                {step === 'shipping' && (
-                  <button onClick={handlePlaceOrder} disabled={!isShippingValid || isPending} className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-                    {isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('placingOrder')}</> : t('placeOrder')}
-                  </button>
-                )}
+                {step === 'success' && <OrderSuccess t={t} onClose={handleClose} />}
               </div>
-            )}
+
+              {/* Footer */}
+              {step !== 'success' && step !== 'payment' && cart.length > 0 && (
+                <div className="border-t border-gray-100 px-6 py-5 space-y-4 flex-shrink-0">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">{t('total')}</span>
+                    <span className="text-lg font-bold text-gray-900 tabular-nums">{CURRENCY}{getTotalPrice().toFixed(2)}</span>
+                  </div>
+                  {step === 'cart' && (
+                    <button onClick={() => setStep('shipping')} className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-colors">
+                      {t('proceedToCheckout')} <ChevronRight className="w-4 h-4" />
+                    </button>
+                  )}
+                  {step === 'shipping' && (
+                    <button onClick={() => setStep('payment')} disabled={!isShippingValid} className="w-full bg-[#8B1538] hover:bg-[#6B0F2B] text-white py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                      {t('continueToPayment')} <ChevronRight className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              )}
+            </PayPalScriptProvider>
           </motion.div>
         </>
       )}
@@ -328,6 +381,49 @@ function ShippingForm({
         <label className={label}>{t('orderNotes')}</label>
         <textarea className={`${input} resize-none`} rows={3} value={shipping.notes} onChange={(e) => onChange('notes', e.target.value)} placeholder={t('deliveryInstructions')} />
       </div>
+      {error && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>}
+    </div>
+  )
+}
+
+/*==================================================================
+    PAYMENT STEP — PAYPAL BUTTONS
+==================================================================*/
+function PaymentStep({
+  getTotalPrice, createOrder, onApprove, onError, isProcessing, error, t,
+}: {
+  getTotalPrice: () => number
+  createOrder: () => Promise<string>
+  onApprove: (data: OnApproveData) => Promise<void>
+  onError: (err: unknown) => void
+  isProcessing: boolean
+  error: string
+  t: (key: string) => string
+}) {
+  return (
+    <div className="px-6 py-5 space-y-4">
+      {/* Order total */}
+      <div className="bg-gray-50 rounded-xl p-4 flex items-center justify-between">
+        <span className="text-sm text-gray-500">{t('total')}</span>
+        <span className="text-lg font-bold text-gray-900 tabular-nums">{CURRENCY}{getTotalPrice().toFixed(2)}</span>
+      </div>
+
+      {/* PayPal buttons or processing overlay */}
+      {isProcessing ? (
+        <div className="flex flex-col items-center justify-center py-10 gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#8B1538]" />
+          <p className="text-sm text-gray-500">{t('completingOrder')}</p>
+        </div>
+      ) : (
+        <PayPalButtons
+          style={{ layout: 'vertical', shape: 'rect', label: 'pay', height: 48 }}
+          createOrder={createOrder}
+          onApprove={onApprove}
+          onError={onError}
+          disabled={isProcessing}
+        />
+      )}
+
       {error && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>}
     </div>
   )

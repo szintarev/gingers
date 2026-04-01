@@ -50,6 +50,9 @@ importers:
       '@payloadcms/ui':
         specifier: 3.77.0
         version: 3.77.0(@types/react@19.2.9)(monaco-editor@0.55.1)(next@15.4.11(@babel/core@7.29.0)(@playwright/test@1.58.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4))(payload@3.77.0(bufferutil@4.1.0)(graphql@16.13.1)(typescript@5.7.3)(utf-8-validate@6.0.6))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript@5.7.3)
+      '@paypal/react-paypal-js':
+        specifier: ^9.1.0
+        version: 9.1.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -1820,6 +1823,18 @@ packages:
       payload: 3.77.0
       react: ^19.0.1 || ^19.1.2 || ^19.2.1
       react-dom: ^19.0.1 || ^19.1.2 || ^19.2.1
+
+  '@paypal/paypal-js@9.5.0':
+    resolution: {integrity: sha512-j2p6uPpW0hlQ7KOwkiqscbAapZD9NocN1jcjA1Hm5za7PLteq81qVIgJR0Nr0/b1ytfnoN3L2QyG8XubU++kdQ==}
+
+  '@paypal/react-paypal-js@9.1.0':
+    resolution: {integrity: sha512-IgWZ8zMdPNDYWatlLPtt0TmQQvRNzJ9qhDry8Tojw7UjXWZ59UkBfC8wr4mGaB5oJIwWhYezsVJ05E7jFGsJ2g==}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18 || ^19
+      react-dom: ^16.8.0 || ^17 || ^18 || ^19
+
+  '@paypal/sdk-constants@1.0.157':
+    resolution: {integrity: sha512-BjxWT9rK6dM1AOffSpvHYY47/8BY775jgEYYiwH6eL4YaqU5Epcw7zOtwQ8L4UaEn4FCAjZ2EWxaS83dCN7SpA==}
 
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
@@ -4362,6 +4377,9 @@ packages:
   help-me@5.0.0:
     resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
 
+  hi-base32@0.5.1:
+    resolution: {integrity: sha512-EmBBpvdYh/4XxsnUybsPag6VikPYnN30td+vQk+GI3qpahVEG9+gTkG0aXVxTjBqQ5T6ijbWIu77O+C5WFWsnA==}
+
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
 
@@ -5294,6 +5312,9 @@ packages:
   process-warning@5.0.0:
     resolution: {integrity: sha512-a39t9ApHNx2L4+HBnQKqxxHNs1r7KF+Intd8Q/g1bUh6q0WIp9voPXJ/x0j+ZL45KF1pJd9+q2jLIRMfvEshkA==}
 
+  promise-polyfill@8.3.0:
+    resolution: {integrity: sha512-H5oELycFml5yto/atYqmjyigJoAo3+OXwolYiH7OfQuYlAqhxNvTfiNMbV9hsC6Yp83yE5r2KTVmtrG6R9i6Pg==}
+
   prompts@2.4.2:
     resolution: {integrity: sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==}
     engines: {node: '>= 6'}
@@ -5547,6 +5568,9 @@ packages:
     resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
     engines: {node: '>=10'}
     hasBin: true
+
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
 
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
@@ -7986,6 +8010,22 @@ snapshots:
       - monaco-editor
       - supports-color
       - typescript
+
+  '@paypal/paypal-js@9.5.0':
+    dependencies:
+      promise-polyfill: 8.3.0
+
+  '@paypal/react-paypal-js@9.1.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+    dependencies:
+      '@paypal/paypal-js': 9.5.0
+      '@paypal/sdk-constants': 1.0.157
+      react: 19.2.1
+      react-dom: 19.2.1(react@19.2.1)
+      server-only: 0.0.1
+
+  '@paypal/sdk-constants@1.0.157':
+    dependencies:
+      hi-base32: 0.5.1
 
   '@pinojs/redact@0.4.0': {}
 
@@ -10737,6 +10777,8 @@ snapshots:
 
   help-me@5.0.0: {}
 
+  hi-base32@0.5.1: {}
+
   hoist-non-react-statics@3.3.2:
     dependencies:
       react-is: 16.13.1
@@ -11798,6 +11840,8 @@ snapshots:
 
   process-warning@5.0.0: {}
 
+  promise-polyfill@8.3.0: {}
+
   prompts@2.4.2:
     dependencies:
       kleur: 3.0.3
@@ -12094,6 +12138,8 @@ snapshots:
   semver@6.3.1: {}
 
   semver@7.7.4: {}
+
+  server-only@0.0.1: {}
 
   set-function-length@1.2.2:
     dependencies:

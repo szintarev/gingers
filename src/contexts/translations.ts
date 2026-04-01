@@ -118,6 +118,9 @@ export const translations: Record<Language, Translations> = {
     deliveryInstructions: 'Special delivery instructions, allergies, etc.',
     orderThankYou: "Thank you for your order. We've sent a confirmation to your email and will be in touch shortly.",
     somethingWentWrong: 'Something went wrong. Please try again.',
+    payment: 'Payment',
+    continueToPayment: 'Continue to Payment',
+    completingOrder: 'Completing your order...',
   },
   sr: {
     title: 'Gingers',
@@ -234,6 +237,9 @@ export const translations: Record<Language, Translations> = {
     deliveryInstructions: 'Posebne upute za dostavu, alergije, itd.',
     orderThankYou: 'Hvala na vašoj narudžbi. Poslali smo potvrdu na vašu email adresu i uskoro ćemo stupiti u kontakt s vama.',
     somethingWentWrong: 'Nešto je pošlo naopako. Molimo pokušajte ponovo.',
+    payment: 'Plaćanje',
+    continueToPayment: 'Nastavi na plaćanje',
+    completingOrder: 'Narudžba se obrađuje...',
   },
   ru: {
     title: 'Gingers',
@@ -350,6 +356,9 @@ export const translations: Record<Language, Translations> = {
     deliveryInstructions: 'Особые инструкции по доставке, аллергии и т.д.',
     orderThankYou: 'Спасибо за ваш заказ. Мы отправили подтверждение на вашу электронную почту и свяжемся с вами в ближайшее время.',
     somethingWentWrong: 'Что-то пошло не так. Пожалуйста, попробуйте ещё раз.',
+    payment: 'Оплата',
+    continueToPayment: 'Перейти к оплате',
+    completingOrder: 'Оформление заказа...',
   },
   hu: {
     title: 'Gingers',
@@ -466,5 +475,8 @@ export const translations: Record<Language, Translations> = {
     deliveryInstructions: 'Különleges szállítási utasítások, allergiák stb.',
     orderThankYou: 'Köszönjük a rendelését. Megerősítést küldtünk az email címére, és hamarosan felvesszük Önnel a kapcsolatot.',
     somethingWentWrong: 'Valami hiba történt. Kérjük, próbálja újra.',
+    payment: 'Fizetés',
+    continueToPayment: 'Tovább a fizetéshez',
+    completingOrder: 'Rendelés feldolgozása...',
   },
 }
