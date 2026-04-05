@@ -23,7 +23,7 @@ const LanguageContext = createContext<LanguageContextValue | null>(null)
     PROVIDER
 ==================================================================*/
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en')
+  const [language, setLanguageState] = useState<Language>('sr')
 
   // Hydrate from localStorage on mount
   useEffect(() => {

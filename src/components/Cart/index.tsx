@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import { ShoppingBag, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
-import type { OnApproveData } from '@paypal/react-paypal-js'
+type OnApproveData = { orderID: string; payerID?: string | null; paymentID?: string | null }
 import { useCart, type ShippingInfo } from '@/contexts/CartContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { COUNTRIES } from '@/lib/countries'
