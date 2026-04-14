@@ -5,6 +5,8 @@ type Translations = Record<string, string>
 export const translations: Record<Language, Translations> = {
   en: {
     title: 'Gingers',
+    welcomeHeading: 'Welcome',
+    welcomeSubtitle: 'Premium handcrafted ginger products — crafted for your health and enjoyment.',
     subtitle: 'Premium Natural Ginger Products',
     home: 'Home',
     products: 'Products',
@@ -124,6 +126,8 @@ export const translations: Record<Language, Translations> = {
   },
   sr: {
     title: 'Gingers',
+    welcomeHeading: 'Dobrodošli',
+    welcomeSubtitle: 'Premium ručno rađeni đumbirovi proizvodi — izrađeni za vaše zdravlje i uživanje.',
     subtitle: 'Premium prirodni proizvodi od đumbira',
     home: 'Početna',
     products: 'Proizvodi',
@@ -243,6 +247,8 @@ export const translations: Record<Language, Translations> = {
   },
   ru: {
     title: 'Gingers',
+    welcomeHeading: 'Добро пожаловать',
+    welcomeSubtitle: 'Премиальные продукты из имбиря ручной работы — созданные для вашего здоровья и удовольствия.',
     subtitle: 'Премиальные натуральные продукты из имбиря',
     home: 'Главная',
     products: 'Продукты',
@@ -362,6 +368,8 @@ export const translations: Record<Language, Translations> = {
   },
   hu: {
     title: 'Gingers',
+    welcomeHeading: 'Üdvözöljük',
+    welcomeSubtitle: 'Prémium kézzel készített gyömbértermékek — az Ön egészsége és élvezete érdekében.',
     subtitle: 'Prémium természetes gyömbértermékek',
     home: 'Főoldal',
     products: 'Termékek',

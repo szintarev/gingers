@@ -6,13 +6,13 @@ import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
 import { draftMode } from 'next/headers'
 import { unstable_cache } from 'next/cache'
 import React, { cache } from 'react'
-import { homeStatic } from '@/endpoints/seed/home-static'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { WelcomePage } from '@/components/WelcomePage'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -69,9 +69,9 @@ export default async function Page({ params: paramsPromise, searchParams: search
     locale,
   })
 
-  // Remove this code once your website is seeded
+  // Show the welcome page when no home page has been created yet in the CMS
   if (!page && slug === 'home') {
-    page = homeStatic
+    return <WelcomePage />
   }
 
   if (!page) {
