@@ -145,11 +145,23 @@ export const WelcomePage: React.FC = () => {
 
         <p
           ref={subtitleRef}
-          className="text-sm max-w-sm leading-relaxed"
+          className="text-sm max-w-sm leading-relaxed mb-6"
           style={{ color: 'rgba(255,255,255,0.28)' }}
         >
           {t('welcomeSubtitle')}
         </p>
+
+        <div
+          className="px-8 py-3.5 rounded-full text-sm tracking-widest uppercase font-semibold"
+          style={{
+            background: 'rgba(139,21,56,0.25)',
+            border: '1px solid rgba(139,21,56,0.6)',
+            color: 'rgba(255,255,255,0.75)',
+            boxShadow: '0 0 20px rgba(139,21,56,0.2)',
+          }}
+        >
+          Currently in development
+        </div>
       </div>
     </div>
   )
