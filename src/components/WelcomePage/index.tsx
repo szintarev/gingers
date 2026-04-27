@@ -2,8 +2,20 @@
 
 import React, { useEffect, useRef, useCallback } from 'react'
 import { gsap } from 'gsap'
+import { FileText, ExternalLink } from 'lucide-react'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { useLanguage } from '@/contexts/LanguageContext'
+
+const STICKER_URLS = [
+  '/Stiker1_no_margins.pdf',
+  '/Stiker2_no_margins.pdf',
+  '/Stiker3_no_margins.pdf',
+  '/Stiker4_no_margins.pdf',
+  '/Stiker5_no_margins.pdf',
+  '/Stiker6_no_margins.pdf',
+  '/Stiker7_no_margins.pdf',
+  '/Stiker8_no_margins.pdf',
+]
 
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&'
 
@@ -25,6 +37,44 @@ function scrambleTo(el: HTMLElement, finalText: string, duration = 0.7, onComple
     else { el.textContent = finalText; onComplete?.() }
   }
   requestAnimationFrame(tick)
+}
+
+function FileCard({ name, url, viewPdfLabel }: { name: string; url: string; viewPdfLabel: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex flex-col items-center gap-3 p-4 rounded-xl transition-all duration-200"
+      style={{
+        background: 'rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.10)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.11)'
+        e.currentTarget.style.border = '1px solid rgba(255,255,255,0.22)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+        e.currentTarget.style.border = '1px solid rgba(255,255,255,0.10)'
+      }}
+    >
+      <FileText className="w-8 h-8" style={{ color: 'rgba(255,255,255,0.45)' }} />
+      <span className="text-xs text-center leading-snug" style={{ color: 'rgba(255,255,255,0.65)' }}>
+        {name}
+      </span>
+      <span
+        className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full"
+        style={{
+          background: 'rgba(139,21,56,0.55)',
+          color: 'rgba(255,255,255,0.85)',
+        }}
+      >
+        <ExternalLink className="w-3 h-3" />
+        {viewPdfLabel}
+      </span>
+    </a>
+  )
 }
 
 export const WelcomePage: React.FC = () => {
@@ -95,15 +145,15 @@ export const WelcomePage: React.FC = () => {
   return (
     <div
       ref={rootRef}
-      className="fixed inset-0 z-[10002] flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #0a0306 0%, #180610 55%, #0a0306 100%)' }}
+      className="fixed inset-0 z-[10002] flex flex-col items-center overflow-y-auto"
+      style={{ background: 'linear-gradient(160deg, #3D0817 0%, #6B0F2B 55%, #3D0817 100%)' }}
     >
       {/* Subtle centre glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 55% 45% at 50% 45%, rgba(139,21,56,0.14) 0%, transparent 65%)',
+            'radial-gradient(ellipse 55% 45% at 50% 45%, rgba(255,100,120,0.10) 0%, transparent 65%)',
         }}
       />
 
@@ -113,7 +163,7 @@ export const WelcomePage: React.FC = () => {
       </div>
 
       {/* Centre content */}
-      <div className="relative z-10 flex flex-col items-center text-center px-6">
+      <div className="relative z-10 flex flex-col items-center text-center px-6 pt-24 pb-6">
         <div ref={logoRef} className="mb-10">
           <img
             src="/gnglogo.svg"
@@ -162,6 +212,47 @@ export const WelcomePage: React.FC = () => {
         >
           Currently in development
         </div>
+      </div>
+
+      {/* Files section */}
+      <div className="relative z-10 w-full max-w-5xl px-6 pb-16">
+
+        {/* Stickers */}
+        <div className="mb-10">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.12)' }} />
+            <span className="text-xs uppercase tracking-widest font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              {t('stickers')}
+            </span>
+            <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.12)' }} />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {STICKER_URLS.map((url, i) => (
+              <FileCard
+                key={url}
+                name={`${t('sticker')} ${i + 1}`}
+                url={url}
+                viewPdfLabel={t('viewPdf')}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Flyers */}
+        <div>
+          <div className="flex items-center gap-4 mb-5">
+            <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.12)' }} />
+            <span className="text-xs uppercase tracking-widest font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              {t('flyers')}
+            </span>
+            <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.12)' }} />
+          </div>
+          <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
+            <FileCard name={t('flyerFront')} url="/Flajer_Prednja_cut_marks.pdf" viewPdfLabel={t('viewPdf')} />
+            <FileCard name={t('flyerBack')}  url="/Flajer_Zadnja_cut_marks.pdf"  viewPdfLabel={t('viewPdf')} />
+          </div>
+        </div>
+
       </div>
     </div>
   )
